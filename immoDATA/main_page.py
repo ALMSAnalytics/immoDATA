@@ -104,7 +104,7 @@ class MainPage():
         
         return current_url
     
-    def set_select_filter(self, types):
+    def set_select_filter_house_type(self, types):
         # Select Filter Find the Button.
         filter_select_button = self.driver.find_element(by=By.XPATH, 
                                                         value="//div[@class='filter-option-inner']")
@@ -149,6 +149,26 @@ class MainPage():
                                         string_element="Haus", 
                                         list_selected_elements=list_selected_elements, 
                                         types_dict=types)
+        
+    def set_select_angebote_gesuche(self, angebote_gesuche):
+        # Select Filter Find the Button.
+        angebote_gesuche_select_button = self.driver.find_elements(by=By.XPATH, 
+                                                        value="//div[@class='filter-option-inner-inner']")[1]
+        # Click in the Filter Select button to open the Dropdown menu.
+        angebote_gesuche_select_button.click()
+        
+        # Get the Angebote of the List.
+        angebote_element = self.driver.find_elements(by=By.XPATH,
+                                  value="//ul[@class='dropdown-menu inner ']/li")[4]
+        # Enable Angebote element.
+        if angebote_gesuche == "Angebote":
+            angebote_element.click()
+        # Get the Gesuche of the List.
+        gesuche_element = self.driver.find_elements(by=By.XPATH,
+                                  value="//ul[@class='dropdown-menu inner ']/li")[5]
+        # Enable Gesuche element.
+        if angebote_gesuche == "Gesuche":
+            gesuche_element.click()
     
     def enable_disable_dropdown_element(self, element, string_element, list_selected_elements, types_dict):
         """

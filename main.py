@@ -8,11 +8,15 @@ Created on Mon Jul 25 07:15:40 2022
 from immoDATA.main_page import MainPage
 from immoDATA.results_page import ResultsPage
 
-# Define variables.
+# Main Website.
 website = "https://www.wg-gesucht.de/"
+# City in Germany.
 city = "München"
-types = {"WG-Zimmer": False, "1-Zimmer-Wohnung": False,
+# True/False depending on the house type you want.
+types = {"WG-Zimmer": True, "1-Zimmer-Wohnung": False,
          "Wohnung": False, "Haus": False}
+# Angebote or Gesuche.
+angebot_gesuche = "Angebote"
 
 if __name__ == "__main__":
     # Get the Web with ChromeDriverManager.
@@ -21,18 +25,20 @@ if __name__ == "__main__":
     main_web.accept_cookies()
     # Input the City.
     main_web.enter_input_city(city=city)
-    # Set Filter Select.
-    a=main_web.set_select_filter(types=types)
-    # # Click Search Button.
-    # main_web.click_search_button()
-    # # Wait for Results Page and get Results URL.
-    # results_URL = main_web.wait_results_get_results_page()
+    # Set Filter Select House Type.
+    main_web.set_select_filter_house_type(types=types)
+    # Angebote/Gesuche Set.
+    main_web.set_select_angebote_gesuche(angebot_gesuche)
+    # Click Search Button.
+    main_web.click_search_button()
+    # Wait for Results Page and get Results URL.
+    results_URL = main_web.wait_results_get_results_page()
     
-    # # Initialize Results Page.
-    # results_web = ResultsPage(website=results_URL)
-    # # Get the Raw Rows from the Results document.
-    # rows_raw = results_web.get_raw_rows()
-    # # Get the Data from raw rows.
-    # results_web.get_results_data(rows_raw=rows_raw)
+    # Initialize Results Page.
+    results_web = ResultsPage(website=results_URL)
+    # Get the Raw Rows from the Results document.
+    rows_raw = results_web.get_raw_rows()
+    # Get the Data from raw rows.
+    results_web.get_results_data(rows_raw=rows_raw)
     
     
