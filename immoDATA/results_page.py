@@ -246,6 +246,33 @@ class ResultsPage():
             street = full_text_split[2].strip()
             self.streets.append(street)
             
+    def go_to_next_page(self, driver):
+        """
+        Go to the Next Page and Return the URL for the new Page.
+
+        Parameters
+        ----------
+        driver : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        current_url : TYPE
+            DESCRIPTION.
+
+        """
+        
+        # Search for the Next Page element.
+        page_next_element = driver.find_elements(by=By.XPATH, 
+                                                value="//*[@id='assets_list_pagination']/ul/li")[-1]
+        page_next_element.click()
+        
+        # Get New Results Page.
+        current_url = driver.current_url
+        
+        return current_url
+        
+            
         
     
     

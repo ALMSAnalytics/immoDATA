@@ -41,6 +41,9 @@ if __name__ == "__main__":
     # Get the Data from raw rows.
     results_web.get_results_data(rows_raw=rows_raw)
     
+    # Go to the Next Page.
+    new_results_URL = results_web.go_to_next_page(driver=main_web.driver)
+    
     # Quit the Driver.
     main_web.quit_driver()
     
