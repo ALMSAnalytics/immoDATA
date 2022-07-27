@@ -11,6 +11,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import Select
 
 class MainPage():
     """ Main page action methods come here.
@@ -102,3 +103,79 @@ class MainPage():
         current_url = self.driver.current_url
         
         return current_url
+    
+    def set_select_filter(self, types):
+        # Select Filter Find the Button.
+        filter_select_button = self.driver.find_element(by=By.XPATH, 
+                                                        value="//div[@class='filter-option-inner']")
+        # Click in the Filter Select button to open the Dropdown menu.
+        filter_select_button.click()
+        
+        # Get the Elements Selected.
+        selected_elements = self.driver.find_elements(by=By.XPATH,
+                                  value="//ul[@class='dropdown-menu inner ']/li[@class='selected']")
+        # Generate a List with the selected Elements.
+        list_selected_elements = []
+        for elem in selected_elements:
+            list_selected_elements.append(elem.text)
+        
+        # Get the Elements of the List.
+        wg_zimmer_element = self.driver.find_elements(by=By.XPATH,
+                                  value="//ul[@class='dropdown-menu inner ']/li")[0]
+        # Enable/Disable WG-Zimmer element.
+        self.enable_disable_dropdown_element(element=wg_zimmer_element, 
+                                        string_element="WG-Zimmer", 
+                                        list_selected_elements=list_selected_elements, 
+                                        types_dict=types)
+        
+        one_zimmer_wohnung_element = self.driver.find_elements(by=By.XPATH,
+                                  value="//ul[@class='dropdown-menu inner ']/li")[1]
+        # Enable/Disable 1-Zimmer-Wohnung element.
+        self.enable_disable_dropdown_element(element=one_zimmer_wohnung_element, 
+                                        string_element="1-Zimmer-Wohnung", 
+                                        list_selected_elements=list_selected_elements, 
+                                        types_dict=types)
+        wohnung_element = self.driver.find_elements(by=By.XPATH,
+                                  value="//ul[@class='dropdown-menu inner ']/li")[2]
+        # Enable/Disable Wohnung element.
+        self.enable_disable_dropdown_element(element=wohnung_element, 
+                                        string_element="Wohnung", 
+                                        list_selected_elements=list_selected_elements, 
+                                        types_dict=types)
+        haus_element = self.driver.find_elements(by=By.XPATH,
+                                  value="//ul[@class='dropdown-menu inner ']/li")[3]
+        # Enable/Disable Haus element.
+        self.enable_disable_dropdown_element(element=haus_element, 
+                                        string_element="Haus", 
+                                        list_selected_elements=list_selected_elements, 
+                                        types_dict=types)
+    
+    def enable_disable_dropdown_element(self, element, string_element, list_selected_elements, types_dict):
+        """
+        Enable/Disable the Element in the Dropdown Menu for the Wohnung Type.
+
+        Parameters
+        ----------
+        element : TYPE
+            DESCRIPTION.
+        string_element : TYPE
+            DESCRIPTION.
+        list_selected_elements : TYPE
+            DESCRIPTION.
+        types_dict : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        None.
+
+        """
+        # Case True: if not selected, click.
+        if types_dict[string_element] == True:
+            # Check if WG-Zimmer is in the selected elements list, if not click.
+            if string_element not in list_selected_elements:
+                element.click()
+        elif types_dict[string_element] == False:
+            # Check if WG-Zimmer is not in the selected elements list, if yes click to disable.
+            if string_element in list_selected_elements:
+                element.click()
