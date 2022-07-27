@@ -105,6 +105,19 @@ class MainPage():
         return current_url
     
     def set_select_filter_house_type(self, types):
+        """
+        Set and select the filter for the house type.
+
+        Parameters
+        ----------
+        types : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        None.
+
+        """
         # Select Filter Find the Button.
         filter_select_button = self.driver.find_element(by=By.XPATH, 
                                                         value="//div[@class='filter-option-inner']")
@@ -151,6 +164,19 @@ class MainPage():
                                         types_dict=types)
         
     def set_select_angebote_gesuche(self, angebote_gesuche):
+        """
+        Select and set the Angebote/Gesuche Button.
+
+        Parameters
+        ----------
+        angebote_gesuche : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        None.
+
+        """
         # Select Filter Find the Button.
         angebote_gesuche_select_button = self.driver.find_elements(by=By.XPATH, 
                                                         value="//div[@class='filter-option-inner-inner']")[1]
@@ -199,3 +225,15 @@ class MainPage():
             # Check if WG-Zimmer is not in the selected elements list, if yes click to disable.
             if string_element in list_selected_elements:
                 element.click()
+                
+    def quit_driver(self):
+        """
+        Quit the Driver for Selenium.
+
+        Returns
+        -------
+        None.
+
+        """
+        # Quit the Driver.
+        self.driver.quit()

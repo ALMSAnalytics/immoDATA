@@ -41,4 +41,7 @@ if __name__ == "__main__":
     # Get the Data from raw rows.
     results_web.get_results_data(rows_raw=rows_raw)
     
+    # Quit the Driver.
+    main_web.quit_driver()
+    
     
