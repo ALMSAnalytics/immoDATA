@@ -107,13 +107,18 @@ class ResultsPage():
         self.data["title"] = self.titles
         self.data["link"] = self.links
         self.data["n_room"] = self.n_rooms
+        self.data["n_room"] = self.data["n_room"].astype(float)
         self.data["city"] = self.cities
         self.data["area"] = self.areas
         self.data["street"] = self.streets
         self.data["start_date"] = self.start_dates
         self.data["end_date"] = self.end_dates
+        # Prices in € and type integer.
         self.data["price"] = self.prices
+        self.data["price"] = self.data["price"].astype(int)
+        # Sizes in m2 and type integer.
         self.data["size"] = self.sizes
+        self.data["size"] = self.data["size"].astype(int)
         self.data["author"] = self.authors
         self.data["online_time"] = self.online_times
         self.data["publication_date"] = self.publication_dates
@@ -137,10 +142,13 @@ class ResultsPage():
         # Get the Price.
         if len(price_size_col) > 1:
             price = price_size_col[0].get_text(strip=True).replace(" ", "")
-            self.prices.append(price)
+            if "€" not in price:
+                self.prices.append("0")
+            else:
+                self.prices.append(price.replace("€", ""))
             # Get the Size.
             size = price_size_col[1].get_text(strip=True).replace(" ", "")
-            self.sizes.append(size)
+            self.sizes.append(size.replace("m²", "").strip())
             
     def get_start_end_date(self, row):
         """
@@ -194,7 +202,7 @@ class ResultsPage():
             self.titles.append(title)
             # Get Link.
             link = title_link_col[0].find("a").get("href")
-            self.links.append(link)
+            self.links.append("https://www.wg-gesucht.de" + link)
             
     def get_author_online_time(self, row):
         """
@@ -264,9 +272,6 @@ class ResultsPage():
         None.
 
         """
-        # Wait until the Cookies object is visible. 10 seconds is the timeout.
-        # WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.CLASS_NAME,
-        #                                                                        "col-xs-11")))
         # Search for the # of Rooms, City, Area and Street.
         n_rooms_city_area_street_col = row.find_all("div", {"class": "col-xs-11"})
         if len(n_rooms_city_area_street_col) > 0:
@@ -276,10 +281,19 @@ class ResultsPage():
             full_text_split = full_text.split("|")
             # Get n_rooms, city, area and street.
             n_room = full_text_split[0].strip()
-            self.n_rooms.append(n_room)
+            self.n_rooms.append\
+                (n_room.replace("-Zimmer-Wohnung", 
+                                "").replace("er WG", 
+                                            "").replace("-Zimmer-Haus",
+                                                        "").replace(",", 
+                                                                    ".").strip())
             city = full_text_split[1].strip().replace(" ", "").split("\n\n")[0]
             self.cities.append(city)
-            area = full_text_split[1].strip().replace(" ", "").split("\n\n")[1]
+            # Check if the area is specified, if not assign None.
+            if len(full_text_split[1].strip().replace(" ", "").split("\n\n")) > 1:
+                area = full_text_split[1].strip().replace(" ", "").split("\n\n")[1]
+            else:
+                area = None
             self.areas.append(area)
             street = full_text_split[2].strip()
             self.streets.append(street)

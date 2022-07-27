@@ -13,8 +13,8 @@ website = "https://www.wg-gesucht.de/"
 # City in Germany.
 city = "München"
 # True/False depending on the house type you want.
-types = {"WG-Zimmer": True, "1-Zimmer-Wohnung": False,
-         "Wohnung": False, "Haus": False}
+types = {"WG-Zimmer": False, "1-Zimmer-Wohnung": False,
+         "Wohnung": False, "Haus": True}
 # Angebote or Gesuche.
 angebot_gesuche = "Angebote"
 
