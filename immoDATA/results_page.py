@@ -17,6 +17,8 @@ from bs4 import BeautifulSoup
 
 import pandas as pd
 
+from datetime import timedelta, datetime
+
 class ResultsPage():
     """
         Here page action of the Results page.
@@ -51,11 +53,13 @@ class ResultsPage():
         self.authors = []
         # Online times list.
         self.online_times = []
+        # Publication dates list.
+        self.publication_dates = []
         # Data.
         self.data = pd.DataFrame(columns=["title", "link", 
                                      "n_room", "city", "area", "street", 
                                      "start_date", "end_date", "price", "size",
-                                     "author", "online_time"])
+                                     "author", "online_time", "publication_date"])
         
     def get_raw_rows(self):
         """
@@ -112,6 +116,7 @@ class ResultsPage():
         self.data["size"] = self.sizes
         self.data["author"] = self.authors
         self.data["online_time"] = self.online_times
+        self.data["publication_date"] = self.publication_dates
         
     def get_price_size(self, row):
         """
@@ -213,7 +218,37 @@ class ResultsPage():
             self.authors.append(author)
             # Get Online Time.
             online_time = author_online_col[1].get_text(strip=True).split("Online: ")[-1]
+            # Convert Online Time to TimeDelta depending on which type we have.
+            if ("Sekunden" in online_time) or ("Sekunde" in online_time):
+                online_time = timedelta(seconds=int(online_time.split(" ")[0]))
+            elif ("Minuten" in online_time) or ("Minute" in online_time):
+                online_time = timedelta(minutes=int(online_time.split(" ")[0]))
+            elif ("Stunden" in online_time) or ("Stunde" in online_time):
+                online_time = timedelta(hours=int(online_time.split(" ")[0]))
+            elif ("Tagen" in online_time) or ("Tag" in online_time):
+                online_time = timedelta(days=int(online_time.split(" ")[0]))
+            else:
+                # Case we have directly the date, calculate the Online Time.
+                online_time_formatted = datetime.now() - datetime.strptime(online_time, "%d.%m.%Y")
+                self.online_times.append(online_time_formatted)
+                # Format the publication date.
+                publication_date = datetime.strftime(datetime.strptime(online_time, 
+                                                                       "%d.%m.%Y"), "%Y-%m-%d %H:%M:%S")
+                # Adds the publication date.
+                self.publication_dates.append(publication_date)
+                # Go out of the function.
+                return
+            
+            # Append to Online Times.
             self.online_times.append(online_time)
+            
+            # Calculate approximate publication_date.
+            # NOW - Online Time.
+            publication_date = datetime.now() - online_time
+            # Format the Publication Date.
+            publication_date = datetime.strftime(publication_date, "%Y-%m-%d %H:%M:%S")
+            # Add to the list.
+            self.publication_dates.append(publication_date)
             
     def get_n_rooms_city_area_street(self, row):
         """
@@ -229,6 +264,9 @@ class ResultsPage():
         None.
 
         """
+        # Wait until the Cookies object is visible. 10 seconds is the timeout.
+        # WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.CLASS_NAME,
+        #                                                                        "col-xs-11")))
         # Search for the # of Rooms, City, Area and Street.
         n_rooms_city_area_street_col = row.find_all("div", {"class": "col-xs-11"})
         if len(n_rooms_city_area_street_col) > 0:
