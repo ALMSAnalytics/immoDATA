@@ -16,6 +16,7 @@ import requests
 from bs4 import BeautifulSoup
 
 import pandas as pd
+import numpy as np
 
 from datetime import timedelta, datetime
 
@@ -115,13 +116,16 @@ class ResultsPage():
         self.data["end_date"] = self.end_dates
         # Prices in € and type integer.
         self.data["price"] = self.prices
-        self.data["price"] = self.data["price"].astype(int)
-        # Sizes in m2 and type integer.
+        # Replace empty string with NaN and float type.
+        self.data["price"] = self.data["price"].replace("", np.nan).astype(float)
+        # Sizes in m2 and type float.
         self.data["size"] = self.sizes
-        self.data["size"] = self.data["size"].astype(int)
+        # Replace empty string with NaN and float type.
+        self.data["size"] = self.data["size"].replace("", np.nan).astype(float)
         self.data["author"] = self.authors
         self.data["online_time"] = self.online_times
         self.data["publication_date"] = self.publication_dates
+        self.data["publication_date"] = self.data["publication_date"].astype("datetime64[ns]")
         
     def get_price_size(self, row):
         """
@@ -143,7 +147,7 @@ class ResultsPage():
         if len(price_size_col) > 1:
             price = price_size_col[0].get_text(strip=True).replace(" ", "")
             if "€" not in price:
-                self.prices.append("0")
+                self.prices.append("")
             else:
                 self.prices.append(price.replace("€", ""))
             # Get the Size.
