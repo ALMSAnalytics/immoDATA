@@ -63,6 +63,9 @@ if __name__ == "__main__":
     # Quit the Driver.
     main_web.quit_driver()
     
+    # Remove Duplicates before exporting.
+    results_web.data = results_web.data.drop_duplicates(subset=["link", "n_room", "city", "area",
+                                             "street"])
     # Export to Excel.
     export_excel(results_web)
     
