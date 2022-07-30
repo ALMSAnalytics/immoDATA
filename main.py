@@ -28,8 +28,17 @@ if __name__ == "__main__":
     ##########################################
     # Read immoDB about the city.
     immoDB_city = immoDB(city=city)
-    # Get Latest Publication Date.
-    latest_publication_date_DB = immoDB_city.get_latest_publication_date()
+    # Checks if we have already the Excel or not.
+    if immoDB_city.data is None:
+        # City not in dB.
+        city_in_dB = False
+        # Calculate Limit Date, up to 7 days.
+        limit_date = calculate_limit_date(last_days=7)
+    else:
+        # City in dB.
+        city_in_dB = True
+        # Get Latest Publication Date.
+        limit_date = immoDB_city.get_latest_publication_date()
     
     ##########################################
     ###### MAIN WEB and get the Results ######
@@ -54,8 +63,6 @@ if __name__ == "__main__":
     # Get Data.
     results_web.get_full_results_data()
     
-    # Calculate Limit Date, up to 7 days.
-    limit_date = calculate_limit_date(last_days=7)
     # While Limit Date is not reach, then follow go to next page and retrieve data.
     while len(results_web.data[results_web.data["publication_date"] < limit_date]) == 0:
         # Go to the Next Page.
@@ -69,6 +76,11 @@ if __name__ == "__main__":
     
     # Quit the Driver.
     main_web.quit_driver()
+    
+    # If city in dB, concatenate the results with the ones in immodB.
+    if city_in_dB:
+        # Concatenate in results_web.
+        results_web.data = pd.concat([results_web.data, immoDB_city.data], axis=0)
     
     # Remove Duplicates before exporting.
     results_web.data = remove_duplicates_for_export(results_web)
