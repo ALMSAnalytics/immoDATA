@@ -11,7 +11,8 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import Select
+from selenium.webdriver.chrome.options import Options
+from fake_useragent import UserAgent
 
 class MainPage():
     """ Main page action methods come here.
@@ -19,7 +20,12 @@ class MainPage():
     """
     
     def __init__(self, website):
-        self.driver = webdriver.Chrome(ChromeDriverManager().install())
+        options = Options()
+        ua = UserAgent()
+        userAgent = ua.random
+        print(userAgent)
+        options.add_argument(f'user-agent={userAgent}')
+        self.driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
         self.driver.get(website)
 
     def accept_cookies(self):

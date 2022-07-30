@@ -50,15 +50,20 @@ if __name__ == "__main__":
         ##########################################
         # Get the Web with ChromeDriverManager.
         main_web = MainPage(website=website)
+        time.sleep(2)
         # Accept the Cookies of the Main Page.
         main_web.accept_cookies()
         # Input the City.
+        time.sleep(2)
         main_web.enter_input_city(city=city)
         # Set Filter Select House Type.
+        time.sleep(2)
         main_web.set_select_filter_house_type(types=types)
         # Angebote/Gesuche Set.
+        time.sleep(2)
         main_web.set_select_angebote_gesuche(angebot_gesuche)
         # Click Search Button.
+        time.sleep(2)
         main_web.click_search_button()
         # Wait for Results Page and get Results URL.
         results_URL = main_web.wait_results_get_results_page()
