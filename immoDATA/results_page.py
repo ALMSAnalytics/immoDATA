@@ -36,6 +36,8 @@ class ResultsPage():
         self.links = []
         # N_Rooms list.
         self.n_rooms = []
+        # House Type initialization.
+        self.house_types = []
         # Cities list.
         self.cities = []
         # Areas list.
@@ -58,7 +60,7 @@ class ResultsPage():
         self.publication_dates = []
         # Data.
         self.data = pd.DataFrame(columns=["title", "link", 
-                                     "n_room", "city", "area", "street", 
+                                     "house_type", "n_room", "city", "area", "street", 
                                      "start_date", "end_date", "price", "size",
                                      "author", "online_time", "publication_date"])
         
@@ -126,6 +128,8 @@ class ResultsPage():
         self.data["online_time"] = self.online_times
         self.data["publication_date"] = self.publication_dates
         self.data["publication_date"] = self.data["publication_date"].astype("datetime64[ns]")
+        # Get the House Type.
+        self.data["house_type"] = self.house_types
         
     def get_price_size(self, row):
         """
@@ -285,6 +289,14 @@ class ResultsPage():
             full_text_split = full_text.split("|")
             # Get n_rooms, city, area and street.
             n_room = full_text_split[0].strip()
+            # Find house_type.
+            if "-Zimmer-Wohnung" in n_room:
+                self.house_types.append("Wohnung")
+            elif "er WG" in n_room:
+                self.house_types.append("WG-Zimmer")
+            elif "-Zimmer-Haus" in n_room:
+                self.house_types.append("Haus")
+            
             self.n_rooms.append\
                 (n_room.replace("-Zimmer-Wohnung", 
                                 "").replace("er WG", 
@@ -327,7 +339,27 @@ class ResultsPage():
         current_url = driver.current_url
         
         return current_url
-        
+    
+    def get_full_results_data(self):
+        """
+        Get the Full Results of a ResultsPage object with all the rows.
+
+        Parameters
+        ----------
+        results_URL : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        results_web : ResultsPage object.
+            DESCRIPTION.
+
+        """
+
+        # Get the Raw Rows from the Results document.
+        rows_raw = self.get_raw_rows()
+        # Get the Data from raw rows.
+        self.get_results_data(rows_raw=rows_raw)
             
         
     
