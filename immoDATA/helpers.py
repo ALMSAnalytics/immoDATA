@@ -30,3 +30,12 @@ def remove_duplicates_for_export(results_web):
                                              "street"])
     
     return results_web.data
+
+def read_inputs_cities(cities_file=r"inputs\cities.xlsx"):
+    # Read Excel with Input Cities.
+    df_cities = pd.read_excel(cities_file, sheet_name="Bayern")
+    # List Cities.
+    list_cities = list(df_cities["Stadt/Gemeinde"])
+    
+    return list_cities
+    

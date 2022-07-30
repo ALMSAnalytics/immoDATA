@@ -360,6 +360,7 @@ class ResultsPage():
         rows_raw = self.get_raw_rows()
         # Get the Data from raw rows.
         self.get_results_data(rows_raw=rows_raw)
+        
             
         
     
