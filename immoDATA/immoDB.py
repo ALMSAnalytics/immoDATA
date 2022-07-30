@@ -20,8 +20,13 @@ class immoDB():
         self.excel_main_folder = main_folder
         # City to check.
         self.city = city
+        # Checks if the City is in the dB already.
+        excel_exists = os.path.exists(os.path.join(self.excel_main_folder, self.city + ".xlsx"))
         # Read Excel data.
-        self.data = pd.read_excel(os.path.join(self.excel_main_folder, self.city + ".xlsx"))
+        if excel_exists:
+            self.data = pd.read_excel(os.path.join(self.excel_main_folder, self.city + ".xlsx"))
+        else:
+            self.data = None
         
     def get_latest_publication_date(self):
         # Get the Latest Publication Date from the Excel.

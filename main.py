@@ -49,15 +49,9 @@ if __name__ == "__main__":
     # Wait for Results Page and get Results URL.
     results_URL = main_web.wait_results_get_results_page()
     
-    # # Initialize Results Page.
-    # results_web = ResultsPage(website=results_URL)
-    # # Get the Raw Rows from the Results document.
-    # rows_raw = results_web.get_raw_rows()
-    # # Get the Data from raw rows.
-    # results_web.get_results_data(rows_raw=rows_raw)
-    
     # Create a ResultsPage object with the Results for URL and get the full results data.
     results_web = ResultsPage(website=results_URL)
+    # Get Data.
     results_web.get_full_results_data()
     
     # Calculate Limit Date, up to 7 days.
@@ -66,13 +60,6 @@ if __name__ == "__main__":
     while len(results_web.data[results_web.data["publication_date"] < limit_date]) == 0:
         # Go to the Next Page.
         new_results_URL = results_web.go_to_next_page(driver=main_web.driver)
-        # Get the Data.
-        # # Initialize Results Page.
-        # new_results_web = ResultsPage(website=new_results_URL)
-        # # Get the Raw Rows from the Results document.
-        # new_rows_raw = new_results_web.get_raw_rows()
-        # # Get the Data from raw rows.
-        # new_results_web.get_results_data(rows_raw=new_rows_raw)
         # Create a ResultsPage object with the Results for URL.
         new_results_web = ResultsPage(website=new_results_URL)
         # Get the Full Data for the New Page Results.
