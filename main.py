@@ -18,6 +18,7 @@ import time
 website = "https://www.wg-gesucht.de/"
 # City in Germany.
 cities_list = read_inputs_cities()
+#cities_list.reverse()
 # True/False depending on the house type you want.
 types = {"WG-Zimmer": False, "1-Zimmer-Wohnung": False,
          "Wohnung": True, "Haus": False}
@@ -100,5 +101,5 @@ if __name__ == "__main__":
         
         # Time Sleep.
         print("Sleeping...")
-        time.sleep(180)
+        time.sleep(120)
     
