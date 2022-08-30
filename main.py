@@ -18,10 +18,11 @@ import time
 website = "https://www.wg-gesucht.de/"
 # City in Germany.
 cities_list = read_inputs_cities()
+cities_list = cities_list[0]
 #cities_list.reverse()
 # True/False depending on the house type you want.
-types = {"WG-Zimmer": False, "1-Zimmer-Wohnung": False,
-         "Wohnung": True, "Haus": False}
+types = {"WG-Zimmer": True, "1-Zimmer-Wohnung": False,
+         "Wohnung": False, "Haus": False}
 # Angebote or Gesuche.
 angebot_gesuche = "Angebote"
 
@@ -62,7 +63,7 @@ if __name__ == "__main__":
         main_web.set_select_filter_house_type(types=types)
         # Angebote/Gesuche Set.
         time.sleep(2)
-        main_web.set_select_angebote_gesuche(angebot_gesuche)
+        #main_web.set_select_angebote_gesuche(angebot_gesuche)
         # Click Search Button.
         time.sleep(2)
         main_web.click_search_button()
@@ -78,6 +79,7 @@ if __name__ == "__main__":
         while len(results_web.data[results_web.data["publication_date"] < limit_date]) == 0:
             # Go to the Next Page.
             new_results_URL = results_web.go_to_next_page(driver=main_web.driver)
+            time.sleep(5)
             # Create a ResultsPage object with the Results for URL.
             new_results_web = ResultsPage(website=new_results_URL)
             # Get the Full Data for the New Page Results.
