@@ -349,17 +349,66 @@ class ResultsPage():
         results_URL : TYPE
             DESCRIPTION.
 
-        Returns
-        -------
-        results_web : ResultsPage object.
-            DESCRIPTION.
-
         """
 
         # Get the Raw Rows from the Results document.
         rows_raw = self.get_raw_rows()
         # Get the Data from raw rows.
         self.get_results_data(rows_raw=rows_raw)
+        
+    def click_weitere_filter_button(self, driver):
+        """
+        Click in the Weitere Filter button.
+
+        Parameters
+        ----------
+        driver : TYPE
+            DESCRIPTION.
+
+        """
+        
+        # Search for the Weitere Filter element.
+        weitere_filter_button = driver.find_element(by=By.XPATH, 
+                                                value="//*[@id='offer_filter_form']/div[3]/div[1]/a[1]")
+        weitere_filter_button.click()
+    
+    def set_maximal_distance(self, driver):
+        """
+        Set the Maximum Distance.
+
+        Parameters
+        ----------
+        driver : TYPE
+            DESCRIPTION.
+
+        """
+        
+        # Search for the Weitere Filter element.
+        maximal_entfernung = driver.find_element(by=By.XPATH, 
+                                                value=
+                                                "//*[@id='offer_filter_form']/div[2]/div[2]/div[2]/div/div[3]/div/button/div/div/div")
+        maximal_entfernung.click()
+        # Set 50km for Maximal Distance.
+        distance_50km = driver.find_element(by=By.XPATH, 
+                                                value="//*[@id='offer_filter_form']/div[2]/div[2]/div[2]/div/div[3]/div/div/div/ul/li[11]/a/span[2]")
+        distance_50km.click()
+        
+    def click_filter_anwenden(self, driver):
+        """
+        Click Filter Anwenden button.
+
+        Parameters
+        ----------
+        driver : TYPE
+            DESCRIPTION.
+
+        """
+        
+        # Search for the Filter Anwenden element.
+        filter_anwenden = driver.find_element(by=By.XPATH, 
+                                                value=
+                                                "//*[@id='offer_filter_form']/div[3]/div[3]/button[2]")
+        filter_anwenden.click()
         
             
         

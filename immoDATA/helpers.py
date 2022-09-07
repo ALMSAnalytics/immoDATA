@@ -33,7 +33,7 @@ def remove_duplicates_for_export(results_web):
 
 def read_inputs_cities(cities_file=r"inputs\cities.xlsx"):
     # Read Excel with Input Cities.
-    df_cities = pd.read_excel(cities_file, sheet_name="Bayern")
+    df_cities = pd.read_excel(cities_file, sheet_name="Munich_Area")
     # List Cities.
     list_cities = list(df_cities["Stadt/Gemeinde"])
     
