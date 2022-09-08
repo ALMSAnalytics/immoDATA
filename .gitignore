@@ -3,3 +3,5 @@
 *.pyc
 inputs/cities.xlsx
 .spyproject
+immoDATA/__pycache__/helpers.cpython-39.pyc
+immoDATA/__pycache__/results_page.cpython-39.pyc
