@@ -249,7 +249,7 @@ class ResultsPage():
                 self.online_times.append(online_time_formatted)
                 # Format the publication date.
                 publication_date = datetime.strftime(datetime.strptime(online_time, 
-                                                                       "%d.%m.%Y"), "%Y-%m-%d %H:%M:%S")
+                                                                       "%d.%m.%Y"), "%Y-%m-%d")
                 # Adds the publication date.
                 self.publication_dates.append(publication_date)
                 # Go out of the function.
@@ -262,7 +262,7 @@ class ResultsPage():
             # NOW - Online Time.
             publication_date = datetime.now() - online_time
             # Format the Publication Date.
-            publication_date = datetime.strftime(publication_date, "%Y-%m-%d %H:%M:%S")
+            publication_date = datetime.strftime(publication_date, "%Y-%m-%d")
             # Add to the list.
             self.publication_dates.append(publication_date)
             
@@ -308,6 +308,7 @@ class ResultsPage():
             # Check if the area is specified, if not assign None.
             if len(full_text_split[1].strip().replace(" ", "").split("\n\n")) > 1:
                 area = full_text_split[1].strip().replace(" ", "").split("\n\n")[1]
+                #area = full_text_split[1].strip().split("\n\n")[1]
             else:
                 area = None
             self.areas.append(area)

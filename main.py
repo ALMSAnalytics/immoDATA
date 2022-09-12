@@ -7,8 +7,9 @@ Created on Mon Jul 25 07:15:40 2022
 
 from immoDATA.main_page import MainPage
 from immoDATA.results_page import ResultsPage
-from immoDATA.helpers import export_excel, calculate_limit_date, remove_duplicates_for_export, read_inputs_cities
+from immoDATA.helpers import export_excel, calculate_limit_date, remove_duplicates_for_export, read_inputs_cities, remove_temporary_houses_for_export
 from immoDATA.immoDB import immoDB
+from immoDATA.details_page import DetailsPage
 
 import pandas as pd
 
@@ -118,6 +119,20 @@ if __name__ == "__main__":
             
             # Remove Duplicates before exporting.
             results_web.data = remove_duplicates_for_export(results_web)
+            # Remove Temporary Houses before exporting.
+            results_web.data = remove_temporary_houses_for_export(results_web)
+            
+            # Loop through the Link of the Results Web.
+            df_full_details = pd.DataFrame()
+            for link in results_web.data["link"]:
+                # Create a DetailsPage object with the Link for the Results.
+                details_web = DetailsPage(website=link)
+                # Get the Costs data.
+                details_web.get_costs_data()
+                # Get Features of the House.
+                details_web.get_pictures_data()
+                # Concat for the full Details DataFrame.
+                df_full_details = pd.concat([df_full_details, details_web.data], axis=0)
             
             # Export to Excel.
             export_excel(results_web)

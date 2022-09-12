@@ -22,7 +22,7 @@ from datetime import timedelta, datetime
 
 class DetailsPage():
     """
-        Here page action of the Results page.
+        Here page action of the Details page.
     """
     
     def __init__(self, website):
@@ -30,10 +30,106 @@ class DetailsPage():
         text = requests.get(website).text
         # Parse with BeautifulSoup the text.
         self.doc = BeautifulSoup(text, "html.parser")
-        # Kautions list.
-        self.kautions = []
         # Data.
-        self.data = pd.DataFrame(columns=["kaution"])
+        self.data = pd.DataFrame(columns=["rent_wo_costs", "costs", "deposit", 
+                                          "n_floor", "furnitures", "heating",
+                                          "floor_type", "bath_type", "kitchen",
+                                          "extra_features"])
+        
+    def get_costs_data(self):
+        """
+        Get the Costs data table.
+
+        Returns
+        -------
+        rows_raw : TYPE
+            DESCRIPTION.
+
+        """
+        # Initialize lists.
+        rents_wo_costs = []
+        costss = []
+        deposits = []
+        # Get the classes row noprint and translate into a DataFrame.
+        costs_table_raw = self.doc.find_all("div", 
+                                     {"class": ["col-sm-5"]})[0]
+        # Rent without Costs.
+        try:
+            rents_wo_costs.append(float(costs_table_raw.find_all("td")[1].get_text(strip=True).replace("€", "")))
+        except:
+            pass
+        # Costs.
+        try:
+            costss.append(float(costs_table_raw.find_all("td")[3].get_text(strip=True).replace("€", "")))
+        except:
+            pass
+        # Extra Costs.
+        #extra_costs = kosten_table_raw.find_all("td")[5].get_text(strip=True).replace("€", "")
+        # Deposit.
+        deposits.append(float(costs_table_raw.find_all("td")[7].get_text(strip=True).replace("€", "")))
+        
+        # Assign parameters to the data DataFrame.
+        self.data["rent_wo_costs"] = rents_wo_costs
+        self.data["costs"] = costss
+        self.data["deposit"] = deposits
+    
+    def get_pictures_data(self):
+        """
+        Get the Pictures data table.
+
+        Returns
+        -------
+        rows_raw : TYPE
+            DESCRIPTION.
+
+        """
+        # Initialize lists.
+        n_floors = []
+        furnituress = []
+        heatings = []
+        extra_featuress = []
+        floor_types = []
+        bath_types = []
+        kitchens = []
+        # Pictures Table.
+        pictures_table_raw = self.doc.find_all("div", 
+                                     {"class": ["col-xs-6 col-sm-4 text-center print_text_left"]})
+        # Loop through the Pictures table raw and extract properties of the house.
+        for picture in pictures_table_raw:
+            # Case n_floor.
+            if "mdi mdi-office-building mdi-36px noprint" in str(picture):
+                n_floors.append(picture.get_text(strip=True))
+            elif "mdi mdi-bed-double-outline mdi-36px noprint" in str(picture):
+                furnituress.append(picture.get_text(strip=True))
+            elif "mdi mdi-fire mdi-36px noprint" in str(picture):
+                heatings.append(picture.get_text(strip=True))
+            elif "mdi mdi-folder mdi-36px noprint" in str(picture):
+                extra_featuress.append(picture.get_text(strip=True))
+            elif "mdi mdi-layers mdi-36px noprint" in str(picture):
+                floor_types.append(picture.get_text(strip=True))
+            elif "mdi mdi-shower mdi-36px noprint" in str(picture):
+                bath_types.append(picture.get_text(strip=True))
+            elif "mdi mdi-silverware-fork-knife mdi-36px noprint" in str(picture):
+                kitchens.append(picture.get_text(strip=True))
+        
+        # Assign parameters to the data DataFrame.
+        if len(n_floors) > 0:
+            self.data["n_floor"] = n_floors
+        if len(furnituress) > 0:
+            self.data["furnitures"] = furnituress
+        if len(heatings) > 0: 
+            self.data["heating"] = heatings
+        if len(extra_featuress) > 0:
+            self.data["extra_features"] = extra_featuress
+        if len(floor_types) > 0:
+            self.data["floor_type"] = floor_types
+        if len(bath_types) > 0:
+            self.data["bath_type"] = bath_types
+        if len(kitchens) > 0:
+            self.data["kitchen"] = kitchens   
+
+        
+
         
             
         
