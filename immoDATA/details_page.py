@@ -50,28 +50,57 @@ class DetailsPage():
         rents_wo_costs = []
         costss = []
         deposits = []
+        
         # Get the classes row noprint and translate into a DataFrame.
         costs_table_raw = self.doc.find_all("div", 
-                                     {"class": ["col-sm-5"]})[0]
+                                     {"class": ["col-sm-5"]})
+        # Check if offer still available.
+        if len(costs_table_raw) == 0:
+            # Offer not available.
+            return False
+        # Select the first occurrence for costs_table_raw.
+        costs_table_raw = costs_table_raw[0]
+        
+        # Checks if offer still available.
+        if len(costs_table_raw.find_all("td")) == 0:
+            return False
+        
         # Rent without Costs.
-        try:
-            rents_wo_costs.append(float(costs_table_raw.find_all("td")[1].get_text(strip=True).replace("€", "")))
-        except:
-            pass
+        if "n.a." not in costs_table_raw.find_all("td")[1].get_text(strip=True):
+                    rents_wo_costs.append(float(costs_table_raw.find_all("td")[1].get_text(strip=True).replace("€", "")))
+        else:
+            rents_wo_costs.append(np.nan)
+
         # Costs.
-        try:
+        if "n.a." not in costs_table_raw.find_all("td")[3].get_text(strip=True):
             costss.append(float(costs_table_raw.find_all("td")[3].get_text(strip=True).replace("€", "")))
-        except:
-            pass
+        else:
+            costss.append(np.nan)
+            
+        # Case Rent + Cost is NaN, then offer not available.
+        if (rents_wo_costs[0] is np.nan) and (costss[0] is np.nan):
+            return False
+            
         # Extra Costs.
         #extra_costs = kosten_table_raw.find_all("td")[5].get_text(strip=True).replace("€", "")
         # Deposit.
-        deposits.append(float(costs_table_raw.find_all("td")[7].get_text(strip=True).replace("€", "")))
+        if len(costs_table_raw.find_all("td")) > 7:
+            if "n.a." not in costs_table_raw.find_all("td")[7].get_text(strip=True):
+                deposits.append(float(costs_table_raw.find_all("td")[7].get_text(strip=True).replace("€", "")))
+            else:
+                deposits.append(np.nan)
+        else:
+            deposits.append(np.nan)
         
         # Assign parameters to the data DataFrame.
-        self.data["rent_wo_costs"] = rents_wo_costs
-        self.data["costs"] = costss
-        self.data["deposit"] = deposits
+        if len(rents_wo_costs) > 0:
+            self.data["rent_wo_costs"] = rents_wo_costs
+        if len(costss) > 0:
+            self.data["costs"] = costss
+        if len(deposits) > 0:
+            self.data["deposit"] = deposits
+            
+        return True
     
     def get_pictures_data(self):
         """
