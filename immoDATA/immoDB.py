@@ -5,31 +5,55 @@ Created on Sat Jul 30 10:29:21 2022
 @author: alber
 """
 
+# Import necessary modules.
+from configparser import ConfigParser
+import psycopg2
 import pandas as pd
 import os
 
-main_folder = r"c:\immoDATA_dB"
+# Database Creation: CREATE DATABASE immodb;
+# User Creation: CREATE USER waits WITH PASSWORD 'bitchesbrew';
 
 class immoDB():
     """
         Here functions with the immoDB.
     """
     
-    def __init__(self, city):
-        # Excel folder.
-        self.excel_main_folder = main_folder
-        # City to check.
-        self.city = city
-        # Checks if the City is in the dB already.
-        excel_exists = os.path.exists(os.path.join(self.excel_main_folder, self.city + ".xlsx"))
-        # Read Excel data.
-        if excel_exists:
-            self.data = pd.read_excel(os.path.join(self.excel_main_folder, self.city + ".xlsx"))
+    def __init__(self, filename="database.ini", section="postgresql_immoDB"):
+        # Create Parser.
+        parser = ConfigParser()
+        # Read the Config File.
+        parser.read(filename)
+        # Get Section.
+        db = {}
+        if parser.has_section(section):
+            # Get Parameters of the Section.
+            params = parser.items(section)
+            # Loop through the Parameters and add to Dict.
+            for param in params:
+                db[param[0]] = param[1]
         else:
-            self.data = None
+            # Case we do not have that section, raise the error.
+            raise Exception("Section {0} not found in the {1} file".format(section, filename))
+        # Assign the dB object.
+        self.db_object = db
+        self.conn_handler = ""
+    
+    def connect(self):
+        """
+        Connects with PostgreSQL database with configuration parameters.
+    
+        Returns
+        -------
+        conn : TYPE
+            DESCRIPTION.
+    
+        """
+        # Read config connection parameters.
+        params = self.db_object
+        # Connect to the PostgreSQL server.
+        print("Connecting to PostgreSQL server")
+        conn = psycopg2.connect(**params)
         
-    def get_latest_publication_date(self):
-        # Get the Latest Publication Date from the Excel.
-        latest_publication_date = self.data["publication_date"][0]
-        
-        return latest_publication_date
+        # Return the connection Handler.
+        self.conn_handler = conn
