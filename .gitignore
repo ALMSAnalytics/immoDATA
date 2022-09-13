@@ -5,3 +5,10 @@ inputs/cities.xlsx
 .spyproject
 immoDATA/__pycache__/helpers.cpython-39.pyc
 immoDATA/__pycache__/results_page.cpython-39.pyc
+*.bak
+immoDATA/__pycache__/immoDB.cpython-39.pyc
+documentation/database_overview.xlsx
+documentation/~$database_overview.xlsx
+immoDATA/__pycache__/immoDB.cpython-39.pyc
+.spyproject/config/workspace.ini
+.spyproject/config/backups/workspace.ini.bak
