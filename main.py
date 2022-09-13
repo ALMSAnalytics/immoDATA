@@ -35,6 +35,10 @@ length_to_split = [6, 6, 6, 5]
 input_list = iter(cities_list)
 output_list = [list(islice(input_list, elem)) for elem in length_to_split]
 
+# Connect with immoDB database.
+immoDB_obj = immoDB()
+immoDB_obj.connect()
+
 if __name__ == "__main__":
     # Loop through the Sublists with Cities in the Output List.
     for cities in output_list:
@@ -121,18 +125,36 @@ if __name__ == "__main__":
             results_web.data = remove_duplicates_for_export(results_web)
             # Remove Temporary Houses before exporting.
             results_web.data = remove_temporary_houses_for_export(results_web)
+            # Reset the Index to Match with the Details.
+            results_web.data = results_web.data.reset_index(drop=True)
             
             # Loop through the Link of the Results Web.
             df_full_details = pd.DataFrame()
-            for link in results_web.data["link"]:
+            n_links = len(results_web.data["link"])
+            indexes_details_list = []
+            for i, link in enumerate(results_web.data["link"]):
+                print(str(i+1) + "/" + str(n_links) + " - " + link)
                 # Create a DetailsPage object with the Link for the Results.
                 details_web = DetailsPage(website=link)
                 # Get the Costs data.
-                details_web.get_costs_data()
+                is_data_there = details_web.get_costs_data()
+                # If Data is NOT There, Offer probably already OFF, next iteration.
+                if is_data_there == False:
+                    # Next iteration.
+                    continue
                 # Get Features of the House.
                 details_web.get_pictures_data()
                 # Concat for the full Details DataFrame.
                 df_full_details = pd.concat([df_full_details, details_web.data], axis=0)
+                # Add the index.
+                indexes_details_list.append(i)
+            # Reindex the DataFrame with the full Details.
+            df_full_details.index = indexes_details_list
+            
+            # Concat and generate DataFrame to Export.
+            df_to_export = pd.concat([results_web.data, df_full_details], axis=1, join="inner")
+            # Assign to results_web object.
+            results_web.data = df_to_export
             
             # Export to Excel.
             export_excel(results_web)
