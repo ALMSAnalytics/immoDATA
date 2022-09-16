@@ -45,4 +45,34 @@ def read_inputs_cities(cities_file=r"inputs\cities.xlsx"):
     list_cities = list(df_cities["Stadt/Gemeinde"])
     
     return list_cities
+
+def set_temp_csv_folder_files(csv_folder_temp_data=r"C:\csv_temp_data"):
+    # Checks if the CSV folder temp is created or not.
+    if os.path.exists(csv_folder_temp_data) == False:
+        # Create Dir.
+        os.mkdir(csv_folder_temp_data)
+        
+    # CSV individual items.
+    house_csv_file = os.path.join(csv_folder_temp_data, "house.csv")
+    city_csv_file = os.path.join(csv_folder_temp_data, "city.csv")
+    area_csv_file = os.path.join(csv_folder_temp_data, "area.csv")
+    type_csv_file = os.path.join(csv_folder_temp_data, "type.csv")
+    vendor_csv_file = os.path.join(csv_folder_temp_data, "vendor.csv")
+    
+    return house_csv_file, city_csv_file, area_csv_file, type_csv_file, vendor_csv_file
+
+def set_df_tables():
+    # DataFrames for the Tables.
+    df_house = pd.DataFrame(columns=["title", "n_room", "address", "start_date", "price",
+                                       "rent_wo_costs", "costs", "deposit", "size",
+                                       "author", "publication_date", "n_floor", "floor_type",
+                                       "kitchen", "bath_type", "furnitures", "heating",
+                                       "extra_features", "type", "city", "area", "vendor"])
+    
+    df_city = pd.DataFrame(columns=["name"])
+    df_area = pd.DataFrame(columns=["name"])
+    df_type = pd.DataFrame(columns=["name"])
+    df_vendor = pd.DataFrame(columns=["name"])
+    
+    return df_house, df_city, df_area, df_type, df_vendor
     
