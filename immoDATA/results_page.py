@@ -42,8 +42,8 @@ class ResultsPage():
         self.cities = []
         # Areas list.
         self.areas = []
-        # Streets list.
-        self.streets = []
+        # Addresses list.
+        self.addresses = []
         # Start_dates list.
         self.start_dates = []
         # End_dates list.
@@ -103,8 +103,8 @@ class ResultsPage():
             self.get_title_link(row)
             # Get the Author and Online Time.
             self.get_author_online_time(row)
-            # Get the N Rows, City, Area and Street.
-            self.get_n_rooms_city_area_street(row)
+            # Get the N Rows, City, Area and Address.
+            self.get_n_rooms_city_area_address(row)
             
         # Adds to the full DataFrame.
         self.data["title"] = self.titles
@@ -113,8 +113,9 @@ class ResultsPage():
         self.data["n_room"] = self.data["n_room"].astype(float)
         self.data["city"] = self.cities
         self.data["area"] = self.areas
-        self.data["street"] = self.streets
-        self.data["start_date"] = self.start_dates
+        self.data["address"] = self.addresses
+        self.data["start_date"] = [datetime.strptime(d, "%d.%m.%Y").strftime("%Y-%m-%d") \
+             for d in self.start_dates]
         self.data["end_date"] = self.end_dates
         # Prices in € and type integer.
         self.data["price"] = self.prices
@@ -128,8 +129,12 @@ class ResultsPage():
         self.data["online_time"] = self.online_times
         self.data["publication_date"] = self.publication_dates
         self.data["publication_date"] = self.data["publication_date"].astype("datetime64[ns]")
+        # self.data["publication_date"] = [datetime.strptime(d, "%Y-%m-%d").strftime("%Y-%m-%d") \
+        #      for d in self.publication_dates]
         # Get the House Type.
-        self.data["house_type"] = self.house_types
+        self.data["type"] = self.house_types
+        # Insert the Vendor.
+        self.data["vendor"] = "WG-Gesucht"
         
     def get_price_size(self, row):
         """
@@ -266,9 +271,9 @@ class ResultsPage():
             # Add to the list.
             self.publication_dates.append(publication_date)
             
-    def get_n_rooms_city_area_street(self, row):
+    def get_n_rooms_city_area_address(self, row):
         """
-        Get N_Rooms, City, Area and Street of the given row.
+        Get N_Rooms, City, Area and Address of the given row.
 
         Parameters
         ----------
@@ -313,7 +318,7 @@ class ResultsPage():
                 area = None
             self.areas.append(area)
             street = full_text_split[2].strip()
-            self.streets.append(street)
+            self.addresses.append(street)
             
     def go_to_next_page(self, driver):
         """
