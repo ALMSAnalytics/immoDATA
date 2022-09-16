@@ -144,6 +144,8 @@ class DetailsPage():
         # Assign parameters to the data DataFrame.
         if len(n_floors) > 0:
             self.data["n_floor"] = n_floors
+            # Format the n_floor column.
+            self.format_n_floor_column()
         if len(furnituress) > 0:
             self.data["furnitures"] = furnituress
         if len(heatings) > 0: 
@@ -155,7 +157,23 @@ class DetailsPage():
         if len(bath_types) > 0:
             self.data["bath_type"] = bath_types
         if len(kitchens) > 0:
-            self.data["kitchen"] = kitchens   
+            kitchens_formatted = self.format_kitchen_list(kitchens)
+            self.data["kitchen"] = self.data["kitchen"].astype(bool)
+            self.data["kitchen"] = kitchens_formatted
+        else:
+            self.data["kitchen"] = self.data["kitchen"].astype(bool)
+            self.data["kitchen"] = False
+            
+    def format_n_floor_column(self):
+        # Remove OG and replace EG with 0.
+        self.data["n_floor"] = \
+            self.data["n_floor"].str.replace(". OG", "").replace("EG", 0).replace("Hochparterre", 0.5)
+            
+    def format_kitchen_list(self, kitchens_list):
+        # Remove OG and replace EG with 0.
+        kitchens = [True if s=="Eigene Küche" else False for s in kitchens_list]
+        
+        return kitchens
 
         
 
