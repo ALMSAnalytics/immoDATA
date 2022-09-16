@@ -147,7 +147,8 @@ class immoDB():
                 id_type INTEGER NOT NULL REFERENCES type(id) ON DELETE CASCADE,
                 id_city INTEGER NOT NULL REFERENCES city(id) ON DELETE CASCADE,
                 id_area INTEGER NOT NULL REFERENCES area(id) ON DELETE CASCADE,
-                id_vendor INTEGER NOT NULL REFERENCES vendor(id) ON DELETE CASCADE
+                id_vendor INTEGER NOT NULL REFERENCES vendor(id) ON DELETE CASCADE,
+                UNIQUE (title, author)
             )
             """,
             """
@@ -174,7 +175,8 @@ class immoDB():
                 type VARCHAR(10) NOT NULL,
                 city VARCHAR(50) NOT NULL,
                 area VARCHAR(50) NOT NULL,
-                vendor VARCHAR(20) NOT NULL
+                vendor VARCHAR(20) NOT NULL,
+                UNIQUE (title, author)
             )
             """
             )
