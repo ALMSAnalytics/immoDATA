@@ -7,7 +7,9 @@ Created on Mon Jul 25 07:15:40 2022
 
 from immoDATA.main_page import MainPage
 from immoDATA.results_page import ResultsPage
-from immoDATA.helpers import export_excel, calculate_limit_date, remove_duplicates_for_export, read_inputs_cities, remove_temporary_houses_for_export
+from immoDATA.helpers import calculate_limit_date, remove_duplicates_for_export
+from immoDATA.helpers import read_inputs_cities, remove_temporary_houses_for_export
+from immoDATA.helpers import set_temp_csv_folder_files, set_df_tables
 from immoDATA.immoDB import immoDB
 from immoDATA.details_page import DetailsPage
 
@@ -39,6 +41,14 @@ output_list = [list(islice(input_list, elem)) for elem in length_to_split]
 immoDB_obj = immoDB()
 immoDB_obj.connect()
 
+# Create Tables for immoDB.
+immoDB_obj.create_tables_immoDB()
+
+# Set CSV temporary files.
+house_csv_file, city_csv_file, area_csv_file, type_csv_file, vendor_csv_file = set_temp_csv_folder_files()
+# Initialize DataFrames.
+df_house, df_city, df_area, df_type, df_vendor = set_df_tables()
+
 if __name__ == "__main__":
     # Loop through the Sublists with Cities in the Output List.
     for cities in output_list:
@@ -49,18 +59,9 @@ if __name__ == "__main__":
             ###### DB QUERY current information ######
             ##########################################
             # Read immoDB about the city.
-            immoDB_city = immoDB(city=city)
-            # Checks if we have already the Excel or not.
-            if immoDB_city.data is None:
-                # City not in dB.
-                city_in_dB = False
-                # Calculate Limit Date, up to 7 days.
-                limit_date = calculate_limit_date(last_days=7)
-            else:
-                # City in dB.
-                city_in_dB = True
-                # Get Latest Publication Date.
-                limit_date = immoDB_city.get_latest_publication_date()
+
+            # Calculate Limit Date, up to 7 days.
+            limit_date = calculate_limit_date(last_days=7)
             
             ##########################################
             ###### MAIN WEB and get the Results ######
@@ -116,11 +117,6 @@ if __name__ == "__main__":
             # Quit the Driver.
             main_web.quit_driver()
             
-            # If city in dB, concatenate the results with the ones in immodB.
-            if city_in_dB:
-                # Concatenate in results_web.
-                results_web.data = pd.concat([results_web.data, immoDB_city.data], axis=0)
-            
             # Remove Duplicates before exporting.
             results_web.data = remove_duplicates_for_export(results_web)
             # Remove Temporary Houses before exporting.
@@ -156,8 +152,15 @@ if __name__ == "__main__":
             # Assign to results_web object.
             results_web.data = df_to_export
             
-            # Export to Excel.
-            export_excel(results_web)
+            # Assign Results Web Data to df_house.
+            df_house = results_web.data[df_house.columns]
+            # Export to CSV.
+            df_house.to_csv(house_csv_file, index=False)
+            # Copy CSV to DB.
+            immoDB_obj.copy_csv_to_db("house_raw", 
+                                      house_csv_file, 
+                                      df_house.columns)
+            
             
             # Time Sleep.
             print("Sleeping...")
@@ -165,6 +168,9 @@ if __name__ == "__main__":
             
         # Time Sleep.
         print("Big Sleeping after chunk of 6 Cities...")
-        time.sleep(1800)   
+        time.sleep(1800)
+
+# Disconnect from immoDB database.
+immoDB_obj.disconnect()
         
     
