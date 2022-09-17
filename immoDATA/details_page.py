@@ -167,7 +167,7 @@ class DetailsPage():
     def format_n_floor_column(self):
         # Remove OG and replace EG with 0.
         self.data["n_floor"] = \
-            self.data["n_floor"].str.replace(". OG", "").replace("EG", 0).replace("Hochparterre", 0.5)
+            self.data["n_floor"].str.replace(". OG", "").replace("EG", 0).replace("Hochparterre", 0.5).replace("Dachgeschoss", 99)
             
     def format_kitchen_list(self, kitchens_list):
         # Remove OG and replace EG with 0.
