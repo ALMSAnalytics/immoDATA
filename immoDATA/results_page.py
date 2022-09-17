@@ -112,7 +112,10 @@ class ResultsPage():
         self.data["n_room"] = self.n_rooms
         self.data["n_room"] = self.data["n_room"].astype(float)
         self.data["city"] = self.cities
+        self.data["city"] = self.data["city"].str.lower()
         self.data["area"] = self.areas
+        self.data["area"] = \
+            self.data["area"].str.lower().str.replace(r"-\.\.\.", r"")
         self.data["address"] = self.addresses
         self.data["start_date"] = [datetime.strptime(d, "%d.%m.%Y").strftime("%Y-%m-%d") \
              for d in self.start_dates]
@@ -133,8 +136,9 @@ class ResultsPage():
         #      for d in self.publication_dates]
         # Get the House Type.
         self.data["type"] = self.house_types
+        self.data["type"] = self.data["type"].str.lower().str.replace("wohnung", "house")
         # Insert the Vendor.
-        self.data["vendor"] = "WG-Gesucht"
+        self.data["vendor"] = "wg-gesucht"
         
     def get_price_size(self, row):
         """
