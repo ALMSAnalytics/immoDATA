@@ -44,17 +44,17 @@ immoDB_obj.connect()
 # Create Tables for immoDB.
 immoDB_obj.create_tables_immoDB()
 
-# Set CSV temporary files.
-house_csv_file, city_csv_file, area_csv_file, type_csv_file, vendor_csv_file = set_temp_csv_folder_files()
-# Initialize DataFrames.
-df_house, df_city, df_area, df_type, df_vendor = set_df_tables()
-
 if __name__ == "__main__":
     # Loop through the Sublists with Cities in the Output List.
     for cities in output_list:
         # Loop through all the Cities in the list.
         for city in cities:
             print("Scraping data for city: " + city)
+            # Set CSV temporary files.
+            house_csv_file, city_csv_file, area_csv_file, type_csv_file, vendor_csv_file = \
+                set_temp_csv_folder_files()
+            # Initialize DataFrames.
+            df_house, df_city, df_area, df_type, df_vendor = set_df_tables()
             ##########################################
             ###### DB QUERY current information ######
             ##########################################
@@ -154,12 +154,43 @@ if __name__ == "__main__":
             
             # Assign Results Web Data to df_house.
             df_house = results_web.data[df_house.columns]
-            # Export to CSV.
-            df_house.to_csv(house_csv_file, index=False)
-            # Copy CSV to DB.
-            immoDB_obj.copy_csv_to_db("house_raw", 
-                                      house_csv_file, 
-                                      df_house.columns)
+            # Assign City.
+            df_city["name"] = list(df_house["city"].unique())
+            # Assign Vendor.
+            df_vendor["name"] = list(df_house["vendor"].unique())
+            # Assign Type.
+            df_type["name"] = list(df_house["type"].unique())
+            # Assign Area.
+            df_area["name"] = list(df_house["area"].unique())
+            
+            # COPY AND EXPORT THE DataFrames INTO IMMODB.
+            # house_raw table.
+            immoDB_obj.csv_export_and_copy_to_db(house_csv_file, 
+                                                  df_house, 
+                                                  "house_raw")
+            # city table.
+            if immoDB_obj.is_city_exists(df_city["name"].squeeze()) == False:
+                immoDB_obj.csv_export_and_copy_to_db(city_csv_file, 
+                                                      df_city, 
+                                                      "city")
+            # vendor table.
+            if immoDB_obj.is_vendor_exists(df_vendor["name"].squeeze()) == False:
+                immoDB_obj.csv_export_and_copy_to_db(vendor_csv_file, 
+                                                      df_vendor, 
+                                                      "vendor")
+            # type table.
+            if immoDB_obj.is_type_exists(df_type["name"].squeeze()) == False:
+                immoDB_obj.csv_export_and_copy_to_db(type_csv_file, 
+                                                      df_type, 
+                                                      "type")
+            # area table.
+            if immoDB_obj.is_area_exists(df_area["name"].squeeze()) == False:
+                immoDB_obj.csv_export_and_copy_to_db(area_csv_file, 
+                                                      df_area, 
+                                                      "area")
+                
+            # Normalize house table.
+            immoDB_obj.normalize_house(city_name=city.lower().replace("ü", "u"))
             
             
             # Time Sleep.
