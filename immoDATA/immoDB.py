@@ -114,7 +114,7 @@ class immoDB():
             """
             CREATE TABLE area (
                 id SERIAL UNIQUE NOT NULL,
-                name VARCHAR(20) UNIQUE NOT NULL
+                name VARCHAR(150) UNIQUE NOT NULL
             )
             """,
             """
@@ -174,7 +174,7 @@ class immoDB():
                 extra_features VARCHAR(300),
                 type VARCHAR(10) NOT NULL,
                 city VARCHAR(50) NOT NULL,
-                area VARCHAR(50) NOT NULL,
+                area VARCHAR(150) NOT NULL,
                 vendor VARCHAR(20) NOT NULL,
                 UNIQUE (title, author)
             )
@@ -224,3 +224,156 @@ class immoDB():
             cursor.close()
             return 1
         print("copy_csv_to_db() DONE for TABLE: " + table_name)
+        
+    def csv_export_and_copy_to_db(self, csv_file, df, db_table_name):
+        # Export to CSV.
+        df.to_csv(csv_file, index=False)
+        # Copy CSV to DB.
+        self.copy_csv_to_db(db_table_name, 
+                                  csv_file, 
+                                  df.columns)
+        
+    def is_city_exists(self, city):
+        # Executes SQL statement.
+        try:
+            # Creates cursor.
+            cursor = self.conn_handler.cursor()
+            # Generates SQL statement.
+            sql = f"SELECT * FROM city WHERE unaccent(name)='{city}';"
+            # Read SQL query in Pandas.
+            data = pd.read_sql_query(sql, self.conn_handler)
+        except (Exception, psycopg2.DatabaseError) as error:
+            print("Error: %s" % error)
+            self.conn_handler.rollback()
+            cursor.close()
+            return 1
+        
+        # Checks if we have results.
+        if len(data) == 0:
+            city_exists = False
+        else:
+            city_exists = True
+        
+        return city_exists
+    
+    def is_type_exists(self, type_name):
+        # Executes SQL statement.
+        try:
+            # Creates cursor.
+            cursor = self.conn_handler.cursor()
+            # Generates SQL statement.
+            sql = f"SELECT * FROM type WHERE unaccent(name)='{type_name}';"
+            # Read SQL query in Pandas.
+            data = pd.read_sql_query(sql, self.conn_handler)
+        except (Exception, psycopg2.DatabaseError) as error:
+            print("Error: %s" % error)
+            self.conn_handler.rollback()
+            cursor.close()
+            return 1
+        
+        # Checks if we have results.
+        if len(data) == 0:
+            type_exists = False
+        else:
+            type_exists = True
+        
+        return type_exists
+    
+    def is_vendor_exists(self, vendor):
+        # Executes SQL statement.
+        try:
+            # Creates cursor.
+            cursor = self.conn_handler.cursor()
+            # Generates SQL statement.
+            sql = f"SELECT * FROM vendor WHERE unaccent(name)='{vendor}';"
+            # Read SQL query in Pandas.
+            data = pd.read_sql_query(sql, self.conn_handler)
+        except (Exception, psycopg2.DatabaseError) as error:
+            print("Error: %s" % error)
+            self.conn_handler.rollback()
+            cursor.close()
+            return 1
+        
+        # Checks if we have results.
+        if len(data) == 0:
+            vendor_exists = False
+        else:
+            vendor_exists = True
+        
+        return vendor_exists
+    
+    def is_area_exists(self, area):
+        # Executes SQL statement.
+        try:
+            # Creates cursor.
+            cursor = self.conn_handler.cursor()
+            # Generates SQL statement.
+            sql = f"SELECT * FROM area WHERE unaccent(name)='{area}';"
+            # Read SQL query in Pandas.
+            data = pd.read_sql_query(sql, self.conn_handler)
+        except (Exception, psycopg2.DatabaseError) as error:
+            print("Error: %s" % error)
+            self.conn_handler.rollback()
+            cursor.close()
+            return 1
+        
+        # Checks if we have results.
+        if len(data) == 0:
+            area_exists = False
+        else:
+            area_exists = True
+        
+        return area_exists
+    
+    def normalize_house(self, city_name):
+        # Generates SQL statement.
+        sql = f"""
+            INSERT INTO house(title, 
+                              n_room, 
+                              address, 
+                              start_date, 
+                              price, 
+                              rent_wo_costs, 
+                              costs,
+                              deposit, 
+                              size, 
+                              author, 
+                              publication_date,
+                              n_floor, 
+                              floor_type, 
+                              kitchen,
+                              bath_type, 
+                              furnitures, 
+                              heating,
+                              extra_features,
+                              id_type,
+                              id_city,
+                              id_area,
+                              id_vendor) 
+            SELECT title, n_room, address, start_date, price, rent_wo_costs,
+                costs, deposit, size, author, publication_date, n_floor, floor_type,
+                kitchen, bath_type, furnitures, heating, extra_features,
+                type.id AS id_type, city.id AS id_city, area.id AS id_area, vendor.id AS id_vendor
+            FROM house_raw 
+            JOIN vendor ON vendor.name=house_raw.vendor 
+            JOIN city ON city.name=house_raw.city
+            JOIN type ON type.name=house_raw.type
+            JOIN area ON area.name=house_raw.area
+            WHERE unaccent(house_raw.city)='{city_name}';
+            """
+                
+        # Executes SQL statement.
+        try:
+            # Creates new Cursor.
+            cursor = self.conn_handler.cursor()
+            # Executes INSERT statement.
+            cursor.execute(sql)
+            # Commit the changes.
+            self.conn_handler.commit()
+        except (Exception, psycopg2.DatabaseError) as error:
+            print("Error: %s" % error)
+            self.conn_handler.rollback()
+            cursor.close()
+            return 1
+        # Print message insertion was done.
+        print("normalize_house() DONE")
