@@ -14,6 +14,7 @@ from immoDATA.immoDB import immoDB
 from immoDATA.details_page import DetailsPage
 
 import pandas as pd
+import numpy as np
 
 import time
 
@@ -30,8 +31,10 @@ types = {"WG-Zimmer": False, "1-Zimmer-Wohnung": False,
 # Angebote or Gesuche.
 angebot_gesuche = "Angebote"
 
-# List of length in which we have to split
-length_to_split = [3, 3, 3, 3, 3, 3, 3, 2]
+# List of length in which we have to split.
+block_n_cities = 3
+length_to_split = [block_n_cities for x in list(range(0, int(np.ceil(len(cities_list)/block_n_cities))))]
+length_to_split[-1] = int(len(cities_list)%3)
  
 # Using islice.
 input_list = iter(cities_list)
