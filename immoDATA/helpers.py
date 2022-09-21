@@ -38,6 +38,11 @@ def remove_temporary_houses_for_export(results_web):
     
     return results_web.data
 
+def remove_person_searches_ads(results_web):
+    results_web.data = results_web.data[~results_web.data["title"].str.contains("^Suche ", regex=True)]
+    
+    return results_web.data
+
 def read_inputs_cities(cities_file=r"inputs\cities.xlsx"):
     # Read Excel with Input Cities.
     df_cities = pd.read_excel(cities_file, sheet_name="Munich_Area")
@@ -58,8 +63,9 @@ def set_temp_csv_folder_files(csv_folder_temp_data=r"C:\csv_temp_data"):
     area_csv_file = os.path.join(csv_folder_temp_data, "area.csv")
     type_csv_file = os.path.join(csv_folder_temp_data, "type.csv")
     vendor_csv_file = os.path.join(csv_folder_temp_data, "vendor.csv")
+    heating_csv_file = os.path.join(csv_folder_temp_data, "heating.csv")
     
-    return house_csv_file, city_csv_file, area_csv_file, type_csv_file, vendor_csv_file
+    return house_csv_file, city_csv_file, area_csv_file, type_csv_file, vendor_csv_file, heating_csv_file
 
 def set_df_tables():
     # DataFrames for the Tables.
@@ -73,6 +79,7 @@ def set_df_tables():
     df_area = pd.DataFrame(columns=["name"])
     df_type = pd.DataFrame(columns=["name"])
     df_vendor = pd.DataFrame(columns=["name"])
+    df_heating = pd.DataFrame(columns=["name"])
     
-    return df_house, df_city, df_area, df_type, df_vendor
+    return df_house, df_city, df_area, df_type, df_vendor, df_heating
     

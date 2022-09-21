@@ -9,7 +9,6 @@ Created on Sat Jul 30 10:29:21 2022
 from configparser import ConfigParser
 import psycopg2
 import pandas as pd
-import os
 
 # Database Creation: CREATE DATABASE immodb;
 # User Creation: CREATE USER waits WITH PASSWORD 'bitchesbrew';
@@ -97,6 +96,7 @@ class immoDB():
             DROP TABLE IF EXISTS area CASCADE;
             DROP TABLE IF EXISTS type CASCADE;
             DROP TABLE IF EXISTS vendor CASCADE;
+            DROP TABLE IF EXISTS heating CASCADE;
             DROP TABLE IF EXISTS house_raw CASCADE;
             """,
             """
@@ -124,6 +124,12 @@ class immoDB():
             )
             """,
             """
+            CREATE TABLE heating (
+                id SERIAL UNIQUE NOT NULL,
+                name VARCHAR(100) UNIQUE NOT NULL
+            )
+            """,
+            """
             CREATE TABLE house (
                 id SERIAL UNIQUE NOT NULL,
                 title VARCHAR(300) UNIQUE NOT NULL,
@@ -140,10 +146,19 @@ class immoDB():
                 n_floor NUMERIC,
                 floor_type VARCHAR(100),
                 kitchen BOOLEAN,
-                bath_type VARCHAR(50),
-                furnitures VARCHAR(50),
-                heating VARCHAR(100),
-                extra_features VARCHAR(300),
+                furnished BOOLEAN,
+                bathtub BOOLEAN,
+                shower BOOLEAN,
+                guest_wc BOOLEAN,
+                washing_machine	BOOLEAN,
+                dishwasher BOOLEAN,
+                garden BOOLEAN,
+                pets BOOLEAN,
+                balcony	BOOLEAN,
+                terrace	BOOLEAN,
+                garage BOOLEAN,
+                elevator BOOLEAN,
+                id_heating INTEGER NOT NULL REFERENCES heating(id) ON DELETE CASCADE,
                 id_type INTEGER NOT NULL REFERENCES type(id) ON DELETE CASCADE,
                 id_city INTEGER NOT NULL REFERENCES city(id) ON DELETE CASCADE,
                 id_area INTEGER NOT NULL REFERENCES area(id) ON DELETE CASCADE,
@@ -199,6 +214,31 @@ class immoDB():
             return 1
         # Print message insertion was done.
         print("create_tables_immoDB() DONE")
+        
+    def exists_table(self, table_name):
+        try:
+            # Creates cursor.
+            cursor = self.conn_handler.cursor()
+            sql = f"""
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM pg_tables
+                    WHERE tablename='{table_name}'
+                )
+                """
+            # Read SQL query in Pandas.
+            is_table = pd.read_sql_query(sql, self.conn_handler)["exists"].iloc[0]
+            # Executes SQL statement => This with execute/fetchall from psycopg2.
+            #cursor.execute(sql)
+            #data = cursor.fetchall()
+        except (Exception, psycopg2.DatabaseError) as error:
+            print("Error: %s" % error)
+            self.conn_handler.rollback()
+            cursor.close()
+            return 1
+        print("exists_table() DONE from TABLE: " + table_name)
+        
+        return is_table
         
     def copy_csv_to_db(self, table_name, csv_file, columns):
         # Get the columns string variable.
@@ -325,6 +365,29 @@ class immoDB():
         
         return area_exists
     
+    def is_heating_exists(self, heating):
+        # Executes SQL statement.
+        try:
+            # Creates cursor.
+            cursor = self.conn_handler.cursor()
+            # Generates SQL statement.
+            sql = f"SELECT * FROM heating WHERE unaccent(name)='{heating}';"
+            # Read SQL query in Pandas.
+            data = pd.read_sql_query(sql, self.conn_handler)
+        except (Exception, psycopg2.DatabaseError) as error:
+            print("Error: %s" % error)
+            self.conn_handler.rollback()
+            cursor.close()
+            return 1
+        
+        # Checks if we have results.
+        if len(data) == 0:
+            heating_exists = False
+        else:
+            heating_exists = True
+        
+        return heating_exists
+    
     def normalize_house(self, city_name):
         # Generates SQL statement.
         sql = f"""
@@ -342,23 +405,82 @@ class immoDB():
                               n_floor, 
                               floor_type, 
                               kitchen,
-                              bath_type, 
-                              furnitures, 
-                              heating,
-                              extra_features,
+                              furnished,
+                              bathtub,
+                              shower,
+                              guest_wc,
+                              washing_machine,
+                              dishwasher,
+                              garden,
+                              pets,
+                              balcony,
+                              terrace,
+                              garage,
+                              elevator,
+                              id_heating,
                               id_type,
                               id_city,
                               id_area,
                               id_vendor) 
             SELECT title, n_room, address, start_date, price, rent_wo_costs,
                 costs, deposit, size, author, publication_date, n_floor, floor_type,
-                kitchen, bath_type, furnitures, heating, extra_features,
-                type.id AS id_type, city.id AS id_city, area.id AS id_area, vendor.id AS id_vendor
+                kitchen,
+                CASE WHEN house_raw.furnitures LIKE '%möbliert%'
+                THEN CAST('t' AS BOOLEAN)
+                ELSE CAST('f' AS BOOLEAN)
+                END AS furnished,
+                CASE WHEN house_raw.bath_type LIKE '%Badewanne%'
+                THEN CAST('t' AS BOOLEAN)
+                ELSE CAST('f' AS BOOLEAN)
+                END AS bathtub,
+                CASE WHEN house_raw.bath_type LIKE '%Dusche%'
+                THEN CAST('t' AS BOOLEAN)
+                ELSE CAST('f' AS BOOLEAN)
+                END AS shower,
+                CASE WHEN house_raw.bath_type LIKE '%Gäste WC%'
+                THEN CAST('t' AS BOOLEAN)
+                ELSE CAST('f' AS BOOLEAN)
+                END AS guest_wc,
+                CASE WHEN house_raw.extra_features LIKE '%Waschmaschine%'
+                THEN CAST('t' AS BOOLEAN)
+                ELSE CAST('f' AS BOOLEAN)
+                END AS washing_machine,
+                CASE WHEN house_raw.extra_features LIKE '%Spülmaschine%'
+                THEN CAST('t' AS BOOLEAN)
+                ELSE CAST('f' AS BOOLEAN)
+                END AS dishwasher,
+                CASE WHEN house_raw.extra_features LIKE '%Garten%'
+                THEN CAST('t' AS BOOLEAN)
+                ELSE CAST('f' AS BOOLEAN)
+                END AS garden,
+                CASE WHEN house_raw.extra_features LIKE '%Haustiere erlaubt%'
+                THEN CAST('t' AS BOOLEAN)
+                ELSE CAST('f' AS BOOLEAN)
+                END AS pets,
+                CASE WHEN house_raw.extra_features LIKE '%Balkon%'
+                THEN CAST('t' AS BOOLEAN)
+                ELSE CAST('f' AS BOOLEAN)
+                END AS balcony,
+                CASE WHEN house_raw.extra_features LIKE '%Terrasse%'
+                THEN CAST('t' AS BOOLEAN)
+                ELSE CAST('f' AS BOOLEAN)
+                END AS terrace,
+                CASE WHEN house_raw.extra_features LIKE '%Keller%'
+                THEN CAST('t' AS BOOLEAN)
+                ELSE CAST('f' AS BOOLEAN)
+                END AS garage,
+                CASE WHEN house_raw.extra_features LIKE '%Aufzug%'
+                THEN CAST('t' AS BOOLEAN)
+                ELSE CAST('f' AS BOOLEAN)
+                END AS elevator,
+                heating.id AS id_heating, type.id AS id_type, city.id AS id_city, 
+                area.id AS id_area, vendor.id AS id_vendor
             FROM house_raw 
-            JOIN vendor ON vendor.name=house_raw.vendor 
+            JOIN vendor ON vendor.name=house_raw.vendor
             JOIN city ON city.name=house_raw.city
             JOIN type ON type.name=house_raw.type
             JOIN area ON area.name=house_raw.area
+            JOIN heating ON heating.name=house_raw.heating
             WHERE unaccent(house_raw.city)='{city_name}';
             """
                 
@@ -377,3 +499,26 @@ class immoDB():
             return 1
         # Print message insertion was done.
         print("normalize_house() DONE")
+        
+    def truncate_raw_tables(self):
+    
+        # Generates SQL statement.
+        sql = r"""
+            TRUNCATE TABLE house_raw;
+            """
+                
+        # Executes SQL statement.
+        try:
+            # Creates new Cursor.
+            cursor = self.conn_handler.cursor()
+            # Executes INSERT statement.
+            cursor.execute(sql)
+            # Commit the changes.
+            self.conn_handler.commit()
+        except (Exception, psycopg2.DatabaseError) as error:
+            print("Error: %s" % error)
+            self.conn_handler.rollback()
+            cursor.close()
+            return 1
+        # Print message insertion was done.
+        print("truncate_raw_tables() DONE")

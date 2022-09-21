@@ -115,7 +115,7 @@ class ResultsPage():
         self.data["city"] = self.data["city"].str.lower()
         self.data["area"] = self.areas
         self.data["area"] = \
-            self.data["area"].str.lower().str.replace(r"-\.\.\.", r"")
+            self.data["area"].str.lower().str.replace(r"-\.\.\.", r"", regex=True)
         self.data["address"] = self.addresses
         self.data["start_date"] = [datetime.strptime(d, "%d.%m.%Y").strftime("%Y-%m-%d") \
              for d in self.start_dates]

@@ -150,6 +150,8 @@ class DetailsPage():
             self.data["furnitures"] = furnituress
         if len(heatings) > 0: 
             self.data["heating"] = heatings
+            # Format the heating column.
+            self.format_heating_column()
         if len(extra_featuress) > 0:
             self.data["extra_features"] = extra_featuress
         if len(floor_types) > 0:
@@ -167,13 +169,27 @@ class DetailsPage():
     def format_n_floor_column(self):
         # Remove OG and replace EG with 0.
         self.data["n_floor"] = \
-            self.data["n_floor"].str.replace(". OG", "").replace("EG", 0).replace("Hochparterre", 0.5).replace("Dachgeschoss", 99)
+            self.data["n_floor"].str.replace(". OG", 
+                                             "").replace("EG", 0).replace("Hochparterre", 
+                                                                          0.5).replace("Dachgeschoss", 
+                                                                                       99)
             
     def format_kitchen_list(self, kitchens_list):
         # Remove OG and replace EG with 0.
         kitchens = [True if s=="Eigene Küche" else False for s in kitchens_list]
         
         return kitchens
+    
+    def format_heating_column(self):
+        # Remove OG and replace EG with 0.
+        self.data["heating"] = \
+            self.data["heating"].str.replace("Zentralheizung", 
+                                             "central").replace("Kohleofen", 
+                                                                "coal").replace("Gasheizung", 
+                                                                          "gas").replace("Fernwärme", 
+                                                                                       "district").\
+                                                                                         replace("Nachtspeicherofen", 
+                                                                                                 "night_storage").replace("", "undefined")
 
         
 

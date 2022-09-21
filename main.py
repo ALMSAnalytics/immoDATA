@@ -7,7 +7,7 @@ Created on Mon Jul 25 07:15:40 2022
 
 from immoDATA.main_page import MainPage
 from immoDATA.results_page import ResultsPage
-from immoDATA.helpers import calculate_limit_date, remove_duplicates_for_export
+from immoDATA.helpers import calculate_limit_date, remove_duplicates_for_export, remove_person_searches_ads
 from immoDATA.helpers import read_inputs_cities, remove_temporary_houses_for_export
 from immoDATA.helpers import set_temp_csv_folder_files, set_df_tables
 from immoDATA.immoDB import immoDB
@@ -31,7 +31,7 @@ types = {"WG-Zimmer": False, "1-Zimmer-Wohnung": False,
 angebot_gesuche = "Angebote"
 
 # List of length in which we have to split
-length_to_split = [6, 6, 6, 5]
+length_to_split = [3, 3, 3, 3, 3, 3, 3, 2]
  
 # Using islice.
 input_list = iter(cities_list)
@@ -51,10 +51,10 @@ if __name__ == "__main__":
         for city in cities:
             print("Scraping data for city: " + city)
             # Set CSV temporary files.
-            house_csv_file, city_csv_file, area_csv_file, type_csv_file, vendor_csv_file = \
+            house_csv_file, city_csv_file, area_csv_file, type_csv_file, vendor_csv_file, heating_csv_file = \
                 set_temp_csv_folder_files()
             # Initialize DataFrames.
-            df_house, df_city, df_area, df_type, df_vendor = set_df_tables()
+            df_house, df_city, df_area, df_type, df_vendor, df_heating = set_df_tables()
             ##########################################
             ###### DB QUERY current information ######
             ##########################################
@@ -121,8 +121,10 @@ if __name__ == "__main__":
             results_web.data = remove_duplicates_for_export(results_web)
             # Remove Temporary Houses before exporting.
             results_web.data = remove_temporary_houses_for_export(results_web)
+            # Remove Ads from people searching for flat.
+            results_web.data = remove_person_searches_ads(results_web)
             # Reset the Index to Match with the Details.
-            results_web.data = results_web.data.reset_index(drop=True)
+            results_web.data = results_web.data.reset_index(drop=True)  
             
             # Loop through the Link of the Results Web.
             df_full_details = pd.DataFrame()
@@ -162,6 +164,8 @@ if __name__ == "__main__":
             df_type["name"] = list(df_house["type"].unique())
             # Assign Area.
             df_area["name"] = list(df_house["area"].unique())
+            # Assign Heating.
+            df_heating["name"] = list(df_house["heating"].unique())
             
             # COPY AND EXPORT THE DataFrames INTO IMMODB.
             # house_raw table.
@@ -188,6 +192,11 @@ if __name__ == "__main__":
                 immoDB_obj.csv_export_and_copy_to_db(area_csv_file, 
                                                       df_area, 
                                                       "area")
+            # heating table.
+            if immoDB_obj.is_heating_exists(df_heating["name"].squeeze()) == False:
+                immoDB_obj.csv_export_and_copy_to_db(heating_csv_file, 
+                                                      df_heating, 
+                                                      "heating")
                 
             # Normalize house table.
             immoDB_obj.normalize_house(city_name=city.lower().replace("ü", "u"))
