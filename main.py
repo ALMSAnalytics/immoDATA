@@ -9,7 +9,8 @@ from immoDATA.main_page import MainPage
 from immoDATA.results_page import ResultsPage
 from immoDATA.helpers import calculate_limit_date, remove_duplicates_for_export, remove_person_searches_ads
 from immoDATA.helpers import read_inputs_cities, remove_temporary_houses_for_export
-from immoDATA.helpers import set_temp_csv_folder_files, set_df_tables
+from immoDATA.helpers import remove_already_rented_houses_start_date, rename_innenstadt_with_city
+from immoDATA.helpers import set_temp_csv_folder_files, set_df_tables, remove_city_name_from_df_area
 from immoDATA.immoDB import immoDB
 from immoDATA.details_page import DetailsPage
 
@@ -126,6 +127,8 @@ if __name__ == "__main__":
             results_web.data = remove_temporary_houses_for_export(results_web)
             # Remove Ads from people searching for flat.
             results_web.data = remove_person_searches_ads(results_web)
+            # Remove Already Rented Houses with Start Date empty.
+            results_web.data = remove_already_rented_houses_start_date(results_web)
             # Reset the Index to Match with the Details.
             results_web.data = results_web.data.reset_index(drop=True)  
             
@@ -167,8 +170,14 @@ if __name__ == "__main__":
             df_type["name"] = list(df_house["type"].unique())
             # Assign Area.
             df_area["name"] = list(df_house["area"].unique())
+            # Remove City from Area.
+            df_area = remove_city_name_from_df_area(df_area, city=df_city["name"][0])
+            # Rename Innenstadt with City.
+            df_area = rename_innenstadt_with_city(df_area, city=df_city["name"][0])
             # Assign Heating.
             df_heating["name"] = list(df_house["heating"].unique())
+            # Drop NA for heating.
+            df_heating = df_heating.dropna()
             
             # COPY AND EXPORT THE DataFrames INTO IMMODB.
             # house_raw table.
@@ -176,27 +185,32 @@ if __name__ == "__main__":
                                                   df_house, 
                                                   "house_raw")
             # city table.
-            if immoDB_obj.is_city_exists(df_city["name"].squeeze()) == False:
+            df_city = df_city[df_city["name"].apply(immoDB_obj.is_city_exists) == False]
+            if len(df_city) > 0:
                 immoDB_obj.csv_export_and_copy_to_db(city_csv_file, 
                                                       df_city, 
                                                       "city")
             # vendor table.
-            if immoDB_obj.is_vendor_exists(df_vendor["name"].squeeze()) == False:
+            df_vendor = df_vendor[df_vendor["name"].apply(immoDB_obj.is_vendor_exists) == False]
+            if len(df_vendor) > 0:
                 immoDB_obj.csv_export_and_copy_to_db(vendor_csv_file, 
                                                       df_vendor, 
                                                       "vendor")
             # type table.
-            if immoDB_obj.is_type_exists(df_type["name"].squeeze()) == False:
+            df_type = df_type[df_type["name"].apply(immoDB_obj.is_type_exists) == False]
+            if len(df_type) > 0:
                 immoDB_obj.csv_export_and_copy_to_db(type_csv_file, 
                                                       df_type, 
                                                       "type")
             # area table.
-            if immoDB_obj.is_area_exists(df_area["name"].squeeze()) == False:
+            df_area = df_area[df_area["name"].apply(immoDB_obj.is_area_exists) == False]
+            if len(df_area) > 0:
                 immoDB_obj.csv_export_and_copy_to_db(area_csv_file, 
                                                       df_area, 
                                                       "area")
-            # heating table.
-            if immoDB_obj.is_heating_exists(df_heating["name"].squeeze()) == False:
+            # area table.
+            df_heating = df_heating[df_heating["name"].apply(immoDB_obj.is_heating_exists) == False]
+            if len(df_heating) > 0:
                 immoDB_obj.csv_export_and_copy_to_db(heating_csv_file, 
                                                       df_heating, 
                                                       "heating")
@@ -207,11 +221,11 @@ if __name__ == "__main__":
             
             # Time Sleep.
             print("Sleeping...")
-            time.sleep(60)
+            time.sleep(30)
             
         # Time Sleep.
-        print("Big Sleeping after chunk of 6 Cities...")
-        time.sleep(1800)
+        print("Big Sleeping after chunk of " + str(block_n_cities) + " Cities...")
+        time.sleep(2400)
 
 # Disconnect from immoDB database.
 immoDB_obj.disconnect()

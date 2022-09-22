@@ -38,6 +38,11 @@ def remove_temporary_houses_for_export(results_web):
     
     return results_web.data
 
+def remove_already_rented_houses_start_date(results_web):
+    results_web.data = results_web.data[results_web.data["start_date"].isna() == False]
+    
+    return results_web.data
+
 def remove_person_searches_ads(results_web):
     results_web.data = results_web.data[~results_web.data["title"].str.contains("^Suche ", regex=True)]
     
@@ -82,4 +87,16 @@ def set_df_tables():
     df_heating = pd.DataFrame(columns=["name"])
     
     return df_house, df_city, df_area, df_type, df_vendor, df_heating
+
+def rename_innenstadt_with_city(df_area, city):
+    df_area = df_area.replace(r"innenstadt", city + "_innenstadt", regex=True)
+    df_area = df_area.replace(r"zentrum", city + "_zentrum", regex=True)
+    
+    return df_area
+
+def remove_city_name_from_df_area(df_area, city):
+    df_area["name"] = [x.replace(city.lower(), "") for x in df_area["name"]]
+    
+    return df_area
+    
     

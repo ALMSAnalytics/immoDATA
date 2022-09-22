@@ -170,7 +170,7 @@ class DetailsPage():
         # Remove OG and replace EG with 0.
         self.data["n_floor"] = \
             self.data["n_floor"].str.replace(". OG", 
-                                             "").replace("EG", 0).replace("Hochparterre", 
+                                             "", regex=True).replace("EG", 0).replace("Hochparterre", 
                                                                           0.5).replace("Dachgeschoss", 
                                                                                        99)
             
