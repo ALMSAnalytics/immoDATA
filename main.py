@@ -218,6 +218,9 @@ if __name__ == "__main__":
             # Normalize house table.
             immoDB_obj.normalize_house(city_name=city.lower().replace("ü", "u"))
             
+            # Truncate RAW table for houses.
+            immoDB_obj.truncate_raw_tables()
+            
             
             # Time Sleep.
             print("Sleeping...")

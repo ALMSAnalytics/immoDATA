@@ -525,3 +525,26 @@ class immoDB():
             return 1
         # Print message insertion was done.
         print("truncate_raw_tables() DONE")
+        
+    def exists_link_house(self, link):
+        # Executes SQL statement.
+        try:
+            # Creates cursor.
+            cursor = self.conn_handler.cursor()
+            # Generates SQL statement.
+            sql = f"SELECT * FROM house WHERE link='{link}';"
+            # Read SQL query in Pandas.
+            data = pd.read_sql_query(sql, self.conn_handler)
+        except (Exception, psycopg2.DatabaseError) as error:
+            print("Error: %s" % error)
+            self.conn_handler.rollback()
+            cursor.close()
+            return 1
+        
+        # Checks if we have results.
+        if len(data) == 0:
+            link_exists = False
+        else:
+            link_exists = True
+        
+        return link_exists
