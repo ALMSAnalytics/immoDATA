@@ -74,7 +74,7 @@ def set_temp_csv_folder_files(csv_folder_temp_data=r"C:\csv_temp_data"):
 
 def set_df_tables():
     # DataFrames for the Tables.
-    df_house = pd.DataFrame(columns=["title", "n_room", "address", "start_date", "price",
+    df_house = pd.DataFrame(columns=["title", "link", "n_room", "address", "start_date", "price",
                                        "rent_wo_costs", "costs", "deposit", "size",
                                        "author", "publication_date", "n_floor", "floor_type",
                                        "kitchen", "bath_type", "furnitures", "heating",

@@ -133,6 +133,7 @@ class immoDB():
             CREATE TABLE house (
                 id SERIAL UNIQUE NOT NULL,
                 title VARCHAR(300) UNIQUE NOT NULL,
+                link VARCHAR(1000) UNIQUE NOT NULL,
                 n_room NUMERIC NOT NULL,
                 address VARCHAR(50),
                 start_date DATE NOT NULL,
@@ -170,6 +171,7 @@ class immoDB():
             CREATE TABLE house_raw (
                 id SERIAL UNIQUE NOT NULL,
                 title VARCHAR(300) UNIQUE NOT NULL,
+                link VARCHAR(1000) UNIQUE NOT NULL,
                 n_room NUMERIC NOT NULL,
                 address VARCHAR(50),
                 start_date DATE NOT NULL,
@@ -391,7 +393,8 @@ class immoDB():
     def normalize_house(self, city_name):
         # Generates SQL statement.
         sql = f"""
-            INSERT INTO house(title, 
+            INSERT INTO house(title,
+                              link,
                               n_room, 
                               address, 
                               start_date, 
@@ -422,7 +425,7 @@ class immoDB():
                               id_city,
                               id_area,
                               id_vendor) 
-            SELECT title, n_room, address, start_date, price, rent_wo_costs,
+            SELECT title, link, n_room, address, start_date, price, rent_wo_costs,
                 costs, deposit, size, author, publication_date, n_floor, floor_type,
                 kitchen,
                 CASE WHEN house_raw.furnitures LIKE '%möbliert%'
