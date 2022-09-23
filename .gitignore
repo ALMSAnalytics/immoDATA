@@ -18,3 +18,4 @@ documentation/database_overview.xlsx
 documentation/database_overview.xlsx
 immoDATA/__pycache__/immoDB.cpython-39.pyc
 .spyproject/config/workspace.ini
+*.pyc
