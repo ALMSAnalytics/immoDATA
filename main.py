@@ -25,6 +25,7 @@ from itertools import islice
 website = "https://www.wg-gesucht.de/"
 # City in Germany.
 cities_list = read_inputs_cities()
+cities_list = cities_list[12:]
 #cities_list.reverse()
 # True/False depending on the house type you want.
 types = {"WG-Zimmer": False, "1-Zimmer-Wohnung": False,
@@ -46,7 +47,7 @@ immoDB_obj = immoDB()
 immoDB_obj.connect()
 
 # Create Tables for immoDB.
-immoDB_obj.create_tables_immoDB()
+#immoDB_obj.create_tables_immoDB()
 
 if __name__ == "__main__":
     # Loop through the Sublists with Cities in the Output List.
@@ -54,6 +55,8 @@ if __name__ == "__main__":
         # Loop through all the Cities in the list.
         for city in cities:
             print("Scraping data for city: " + city)
+            # Initialize go_to_next_page.
+            go_next_page = True
             # Set CSV temporary files.
             house_csv_file, city_csv_file, area_csv_file, type_csv_file, vendor_csv_file, heating_csv_file = \
                 set_temp_csv_folder_files()
@@ -102,21 +105,35 @@ if __name__ == "__main__":
             # Get Data.
             results_web.get_full_results_data()
             
+            # Checks in the results_web data if we already have any ad.
+            links_already_in_DB = results_web.data["link"].apply(immoDB_obj.exists_link_house)
+            # Check if we have any True, meaning there are registries already in DB.
+            links_in_DB = links_already_in_DB[links_already_in_DB == True]
+            # Case we have True, we have something in DB, no need to go next page.
+            if len(links_in_DB) > 0:
+                # Select until the True index.
+                last_index = links_in_DB.index[0]
+                # Change Results_web data.
+                results_web.data = results_web.data.loc[:last_index-1,:]
+                # Go to next page.
+                go_next_page = False
+            
             # While Limit Date is not reach, then follow go to next page and retrieve data.
-            while len(results_web.data[results_web.data["publication_date"] < limit_date]) == 0:
-                # Go to the Next Page.
-                try:
-                    new_results_URL = results_web.go_to_next_page(driver=main_web.driver)
-                except:
-                    continue
-                
-                time.sleep(5)
-                # Create a ResultsPage object with the Results for URL.
-                new_results_web = ResultsPage(website=new_results_URL)
-                # Get the Full Data for the New Page Results.
-                new_results_web.get_full_results_data()
-                # Concat the Results to the Final Object.
-                results_web.data = pd.concat([results_web.data, new_results_web.data], axis=0)
+            if go_next_page == True:
+                while len(results_web.data[results_web.data["publication_date"] < limit_date]) == 0:
+                    # Go to the Next Page.
+                    try:
+                        new_results_URL = results_web.go_to_next_page(driver=main_web.driver)
+                    except:
+                        continue
+                    
+                    time.sleep(5)
+                    # Create a ResultsPage object with the Results for URL.
+                    new_results_web = ResultsPage(website=new_results_URL)
+                    # Get the Full Data for the New Page Results.
+                    new_results_web.get_full_results_data()
+                    # Concat the Results to the Final Object.
+                    results_web.data = pd.concat([results_web.data, new_results_web.data], axis=0)
             
             # Quit the Driver.
             main_web.quit_driver()
@@ -161,6 +178,8 @@ if __name__ == "__main__":
             results_web.data = df_to_export
             
             # Assign Results Web Data to df_house.
+            if len(results_web.data) == 0:
+                continue
             df_house = results_web.data[df_house.columns]
             # Assign City.
             df_city["name"] = list(df_house["city"].unique())
@@ -216,7 +235,11 @@ if __name__ == "__main__":
                                                       "heating")
                 
             # Normalize house table.
-            immoDB_obj.normalize_house(city_name=city.lower().replace("ü", "u"))
+            immoDB_obj.normalize_house(city_name=city.lower().replace("ü", 
+                                                                      "u").replace("ö", 
+                                                                                   "o").replace("ä", 
+                                                                                                "a").replace("ß", 
+                                                                                                             "ss"))
             
             # Truncate RAW table for houses.
             immoDB_obj.truncate_raw_tables()

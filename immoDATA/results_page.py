@@ -117,11 +117,8 @@ class ResultsPage():
         self.data["area"] = \
             self.data["area"].str.lower().str.replace(r"-\.\.\.", r"", regex=True)
         self.data["address"] = self.addresses
-        try:
-            self.data["start_date"] = [datetime.strptime(d, "%d.%m.%Y").strftime("%Y-%m-%d") \
-                 for d in self.start_dates]
-        except:
-            pass
+        self.data["start_date"] = [datetime.strptime(d, "%d.%m.%Y").strftime("%Y-%m-%d") \
+                 if d is not None else None for d in self.start_dates]
         self.data["end_date"] = self.end_dates
         # Prices in € and type integer.
         self.data["price"] = self.prices
@@ -197,6 +194,9 @@ class ResultsPage():
                 start_date = split_dates[0].replace("ab", "").strip()
                 end_date = None
             # Append Start and End Dates.
+            # If start_date empty => Substitute for None.
+            if start_date == "":
+                start_date = None
             self.start_dates.append(start_date)
             self.end_dates.append(end_date)
             

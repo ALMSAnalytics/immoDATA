@@ -172,7 +172,7 @@ class DetailsPage():
             self.data["n_floor"].str.replace(". OG", 
                                              "", regex=True).replace("EG", 0).replace("Hochparterre", 
                                                                           0.5).replace("Dachgeschoss", 
-                                                                                       99).replace("höher als 5", 5)
+                                                                                       99).replace("höher als 5", 5).replace("Tiefparterre", -1)
             
     def format_kitchen_list(self, kitchens_list):
         # Remove OG and replace EG with 0.
