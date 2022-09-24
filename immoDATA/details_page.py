@@ -86,7 +86,10 @@ class DetailsPage():
         # Deposit.
         if len(costs_table_raw.find_all("td")) > 7:
             if "n.a." not in costs_table_raw.find_all("td")[7].get_text(strip=True):
-                deposits.append(float(costs_table_raw.find_all("td")[7].get_text(strip=True).replace("€", "")))
+                if "SCHUFA" in costs_table_raw.find_all("td")[7].get_text(strip=True):
+                    deposits.append(np.nan)
+                else:
+                    deposits.append(float(costs_table_raw.find_all("td")[7].get_text(strip=True).replace("€", "")))
             else:
                 deposits.append(np.nan)
         else:

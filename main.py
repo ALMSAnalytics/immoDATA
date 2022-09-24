@@ -25,7 +25,7 @@ from itertools import islice
 website = "https://www.wg-gesucht.de/"
 # City in Germany.
 cities_list = read_inputs_cities()
-cities_list = cities_list[12:]
+cities_list = cities_list[25:]
 #cities_list.reverse()
 # True/False depending on the house type you want.
 types = {"WG-Zimmer": False, "1-Zimmer-Wohnung": False,
@@ -34,7 +34,7 @@ types = {"WG-Zimmer": False, "1-Zimmer-Wohnung": False,
 angebot_gesuche = "Angebote"
 
 # List of length in which we have to split.
-block_n_cities = 3
+block_n_cities = 4
 length_to_split = [block_n_cities for x in list(range(0, int(np.ceil(len(cities_list)/block_n_cities))))]
 length_to_split[-1] = int(len(cities_list)%3)
  
@@ -120,7 +120,8 @@ if __name__ == "__main__":
             
             # While Limit Date is not reach, then follow go to next page and retrieve data.
             if go_next_page == True:
-                while len(results_web.data[results_web.data["publication_date"] < limit_date]) == 0:
+                while (len(results_web.data[results_web.data["publication_date"] < limit_date]) == 0) \
+                    and go_next_page == True:
                     # Go to the Next Page.
                     try:
                         new_results_URL = results_web.go_to_next_page(driver=main_web.driver)
@@ -132,6 +133,18 @@ if __name__ == "__main__":
                     new_results_web = ResultsPage(website=new_results_URL)
                     # Get the Full Data for the New Page Results.
                     new_results_web.get_full_results_data()
+                    # Checks in the results_web data if we already have any ad.
+                    links_already_in_DB = new_results_web.data["link"].apply(immoDB_obj.exists_link_house)
+                    # Check if we have any True, meaning there are registries already in DB.
+                    links_in_DB = links_already_in_DB[links_already_in_DB == True]
+                    # Case we have True, we have something in DB, no need to go next page.
+                    if len(links_in_DB) > 0:
+                        # Select until the True index.
+                        last_index = links_in_DB.index[0]
+                        # Change Results_web data.
+                        new_results_web.data = new_results_web.data.loc[:last_index-1,:]
+                        # Go to next page.
+                        go_next_page = False
                     # Concat the Results to the Final Object.
                     results_web.data = pd.concat([results_web.data, new_results_web.data], axis=0)
             
@@ -190,10 +203,11 @@ if __name__ == "__main__":
             # Assign Area.
             df_area["name"] = list(df_house["area"].unique())
             # Remove City from Area.
-            if df_area["name"][0] == df_city["name"][0] == False:
+            if (df_area["name"][0] == df_city["name"][0]) == False:
                 df_area = remove_city_name_from_df_area(df_area, city=df_city["name"][0])
             # Rename Innenstadt with City.
             df_area = rename_innenstadt_with_city(df_area, city=df_city["name"][0])
+            df_house.loc[:, "area"] = rename_innenstadt_with_city(df_house["area"], city)
             # Assign Heating.
             df_heating["name"] = list(df_house["heating"].unique())
             # Drop NA for heating.
@@ -228,7 +242,7 @@ if __name__ == "__main__":
                 immoDB_obj.csv_export_and_copy_to_db(area_csv_file, 
                                                       df_area, 
                                                       "area")
-            # area table.
+            # heating table.
             df_heating = df_heating[df_heating["name"].apply(immoDB_obj.is_heating_exists) == False]
             if len(df_heating) > 0:
                 immoDB_obj.csv_export_and_copy_to_db(heating_csv_file, 

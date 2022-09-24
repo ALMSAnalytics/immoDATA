@@ -50,7 +50,7 @@ def remove_person_searches_ads(results_web):
 
 def read_inputs_cities(cities_file=r"inputs\cities.xlsx"):
     # Read Excel with Input Cities.
-    df_cities = pd.read_excel(cities_file, sheet_name="Munich_Area")
+    df_cities = pd.read_excel(cities_file, sheet_name="Bayern")
     # List Cities.
     list_cities = list(df_cities["Stadt/Gemeinde"])
     
@@ -89,13 +89,13 @@ def set_df_tables():
     return df_house, df_city, df_area, df_type, df_vendor, df_heating
 
 def rename_innenstadt_with_city(df_area, city):
-    df_area = df_area.replace(r"innenstadt", city + "_innenstadt", regex=True)
-    df_area = df_area.replace(r"zentrum", city + "_zentrum", regex=True)
+    df_area = df_area.replace(r"innenstadt", city.lower() + "_innenstadt", regex=True)
+    df_area = df_area.replace(r"zentrum", city.lower() + "_zentrum", regex=True)
     
     return df_area
 
 def remove_city_name_from_df_area(df_area, city):
-    df_area["name"] = [x.replace(city.lower(), "") for x in df_area["name"]]
+    df_area["name"] = [x.replace(city.lower(), "") if x is not None else None for x in df_area["name"]]
     
     return df_area
     
