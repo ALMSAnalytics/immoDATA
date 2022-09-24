@@ -190,7 +190,8 @@ if __name__ == "__main__":
             # Assign Area.
             df_area["name"] = list(df_house["area"].unique())
             # Remove City from Area.
-            df_area = remove_city_name_from_df_area(df_area, city=df_city["name"][0])
+            if df_area["name"][0] == df_city["name"][0] == False:
+                df_area = remove_city_name_from_df_area(df_area, city=df_city["name"][0])
             # Rename Innenstadt with City.
             df_area = rename_innenstadt_with_city(df_area, city=df_city["name"][0])
             # Assign Heating.

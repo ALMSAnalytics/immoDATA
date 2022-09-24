@@ -159,7 +159,7 @@ class immoDB():
                 terrace	BOOLEAN,
                 garage BOOLEAN,
                 elevator BOOLEAN,
-                id_heating INTEGER NOT NULL REFERENCES heating(id) ON DELETE CASCADE,
+                id_heating INTEGER REFERENCES heating(id) ON DELETE CASCADE,
                 id_type INTEGER NOT NULL REFERENCES type(id) ON DELETE CASCADE,
                 id_city INTEGER NOT NULL REFERENCES city(id) ON DELETE CASCADE,
                 id_area INTEGER NOT NULL REFERENCES area(id) ON DELETE CASCADE,
@@ -483,7 +483,7 @@ class immoDB():
             JOIN city ON city.name=house_raw.city
             JOIN type ON type.name=house_raw.type
             JOIN area ON area.name=house_raw.area
-            JOIN heating ON heating.name=house_raw.heating
+            LEFT OUTER JOIN heating ON heating.name=house_raw.heating
             WHERE unaccent(house_raw.city)='{city_name}';
             """
                 
