@@ -25,7 +25,7 @@ from itertools import islice
 website = "https://www.wg-gesucht.de/"
 # City in Germany.
 cities_list = read_inputs_cities()
-cities_list = cities_list[25:]
+cities_list = cities_list[29:]
 #cities_list.reverse()
 # True/False depending on the house type you want.
 types = {"WG-Zimmer": False, "1-Zimmer-Wohnung": False,
@@ -266,7 +266,7 @@ if __name__ == "__main__":
             
         # Time Sleep.
         print("Big Sleeping after chunk of " + str(block_n_cities) + " Cities...")
-        time.sleep(2400)
+        time.sleep(1800)
 
 # Disconnect from immoDB database.
 immoDB_obj.disconnect()
