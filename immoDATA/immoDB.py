@@ -548,3 +548,53 @@ class immoDB():
             link_exists = True
         
         return link_exists
+    
+    def get_data_w_publication_date(self, publication_date):
+        # Executes SQL statement.
+        try:
+            # Creates cursor.
+            cursor = self.conn_handler.cursor()
+            """
+            SELECT  house.publication_date AS date,
+                    city.name AS city, 
+                    area.name AS area, 
+                    house.n_room,
+                    house.size,
+                    house.price,
+                    house.deposit,
+                    house.start_date,
+                    house.kitchen,
+                    house.furnished,
+                    house.link
+            """
+            # Generates SQL statement.
+            sql = f"""
+                    SELECT  house.publication_date AS date,
+                            city.name AS city, 
+                            area.name AS area,
+                            house.n_room,
+                            house.size,
+                            house.price,
+                            house.deposit,
+                            house.start_date,
+                            house.kitchen,
+                            house.furnished,
+                            house.link
+                    FROM house
+                    JOIN city ON city.id=house.id_city
+                    JOIN area ON area.id=house.id_area
+                    JOIN type ON type.id=house.id_type
+                    JOIN vendor ON vendor.id=house.id_vendor
+                    JOIN heating ON heating.id=house.id_heating
+                    WHERE publication_date='{publication_date}';
+            """
+            # Read SQL query in Pandas.
+            data = pd.read_sql_query(sql, self.conn_handler)
+        except (Exception, psycopg2.DatabaseError) as error:
+            print("Error: %s" % error)
+            self.conn_handler.rollback()
+            cursor.close()
+            return 1
+        
+        return data
+

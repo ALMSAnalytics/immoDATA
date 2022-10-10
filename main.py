@@ -25,7 +25,7 @@ from itertools import islice
 website = "https://www.wg-gesucht.de/"
 # City in Germany.
 cities_list = read_inputs_cities()
-cities_list = cities_list[29:]
+cities_list = cities_list[14:]
 #cities_list.reverse()
 # True/False depending on the house type you want.
 types = {"WG-Zimmer": False, "1-Zimmer-Wohnung": False,
@@ -34,7 +34,7 @@ types = {"WG-Zimmer": False, "1-Zimmer-Wohnung": False,
 angebot_gesuche = "Angebote"
 
 # List of length in which we have to split.
-block_n_cities = 4
+block_n_cities = 5
 length_to_split = [block_n_cities for x in list(range(0, int(np.ceil(len(cities_list)/block_n_cities))))]
 length_to_split[-1] = int(len(cities_list)%3)
  
