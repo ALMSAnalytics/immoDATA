@@ -25,7 +25,7 @@ from itertools import islice
 website = "https://www.wg-gesucht.de/"
 # City in Germany.
 cities_list = read_inputs_cities()
-cities_list = cities_list[14:]
+#cities_list = cities_list[23:]
 #cities_list.reverse()
 # True/False depending on the house type you want.
 types = {"WG-Zimmer": False, "1-Zimmer-Wohnung": False,
